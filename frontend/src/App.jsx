@@ -16,8 +16,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-hg-slate-950 flex items-center justify-center text-slate-400">
-        <div className="animate-pulse font-mono text-sm">Verifying Session Credentials...</div>
+      <div className="min-h-screen bg-base flex items-center justify-center text-zinc-500">
+        <div className="animate-pulse-subtle font-mono text-xs tracking-wider">VERIFYING SESSION...</div>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export const App = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-hg-slate-950 text-slate-100 flex flex-col font-sans">
+        <div className="min-h-screen bg-base text-zinc-100 flex flex-col font-sans">
           <Navbar />
           <main className="flex-1">
             <Routes>

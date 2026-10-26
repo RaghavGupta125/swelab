@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { X, Camera, AlertCircle, RefreshCw, KeyRound } from 'lucide-react';
+import { X, Camera, AlertCircle, RefreshCw, ArrowRight } from 'lucide-react';
 
 export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
   const [scannerError, setScannerError] = useState('');
@@ -16,8 +16,6 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
       setIsStarting(true);
 
       const scannerElementId = 'hostguard-qr-reader';
-
-      // Slight timeout to allow DOM element to mount
       const timer = setTimeout(async () => {
         try {
           html5QrCode = new Html5Qrcode(scannerElementId);
@@ -25,46 +23,40 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
 
           const cameras = await Html5Qrcode.getCameras();
           if (cameras && cameras.length > 0) {
-            // Default to environment-facing camera if available
             const cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
 
             await html5QrCode.start(
               cameraId,
               {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
+                fps: 15,
+                qrbox: { width: 220, height: 220 },
               },
               (decodedText) => {
-                // Success callback
                 try {
-                  // If JSON payload was encoded, parse it
                   const parsed = JSON.parse(decodedText);
                   if (parsed.token) {
                     onScanSuccess(parsed.token);
                   } else {
                     onScanSuccess(decodedText);
                   }
-                } catch (e) {
+                } catch {
                   onScanSuccess(decodedText);
                 }
-                stopScanner();
-                onClose();
+                handleClose();
               },
-              (errorMessage) => {
-                // Ignore frequent scanning noise
+              () => {
+                // Ignore per-frame decode failures
               }
             );
-            setIsStarting(false);
           } else {
-            setScannerError('No camera detected on this terminal. Please use manual code lookup.');
-            setIsStarting(false);
+            setScannerError('No optical camera detected on this terminal. Use manual token fallback below.');
           }
         } catch (err) {
-          console.warn('[QR Scanner start error]:', err);
-          setScannerError('Camera access unavailable or permission denied. Please enter token or search manually.');
+          setScannerError(err.message || 'Camera hardware unavailable. Use manual token fallback.');
+        } finally {
           setIsStarting(false);
         }
-      }, 300);
+      }, 250);
 
       return () => {
         clearTimeout(timer);
@@ -80,65 +72,76 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
           scannerRef.current.stop().catch(() => {});
         }
         scannerRef.current.clear();
-      } catch (e) {}
+      } catch {
+        // quiet cleanup
+      }
       scannerRef.current = null;
     }
+  };
+
+  const handleClose = () => {
+    stopScanner();
+    onClose();
   };
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
     if (!manualCode.trim()) return;
     onScanSuccess(manualCode.trim());
-    stopScanner();
-    onClose();
+    handleClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-xl overflow-hidden shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-4 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Camera className="w-5 h-5 text-blue-400" />
-            <h3 className="font-semibold text-white text-sm">Gate QR Code Scanner</h3>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.07] bg-base">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2 h-2 rounded-full bg-accent animate-pulse-subtle" />
+            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-200">
+              Optical Pass Verification
+            </span>
           </div>
           <button
-            onClick={() => {
-              stopScanner();
-              onClose();
-            }}
-            className="text-slate-400 hover:text-white p-1 rounded-lg"
+            onClick={handleClose}
+            className="p-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05] transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Video Scanner Container */}
-        <div className="p-4 flex flex-col items-center">
-          <div className="w-full relative rounded-lg overflow-hidden bg-black aspect-square flex items-center justify-center border border-slate-800">
-            <div id="hostguard-qr-reader" className="w-full h-full"></div>
+        {/* Viewport */}
+        <div className="p-5 flex flex-col items-center">
+          <div className="relative w-full aspect-square max-w-[280px] bg-black rounded border border-white/[0.08] overflow-hidden flex items-center justify-center">
+            {/* Corner Crosshairs */}
+            <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent z-10" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent z-10" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-accent z-10" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-accent z-10" />
+
+            <div id="hostguard-qr-reader" className="w-full h-full" />
 
             {isStarting && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-slate-300">
-                <RefreshCw className="w-8 h-8 animate-spin text-blue-400 mb-2" />
-                <span className="text-xs">Initializing Gate Camera...</span>
+              <div className="absolute inset-0 bg-base/90 flex flex-col items-center justify-center gap-2 z-20">
+                <RefreshCw className="w-5 h-5 text-accent animate-spin" />
+                <span className="font-mono text-2xs text-zinc-400">INITIALIZING OPTICAL SENSOR...</span>
               </div>
             )}
           </div>
 
           {scannerError && (
-            <div className="mt-3 w-full p-2.5 rounded bg-amber-950/60 border border-amber-800/80 text-amber-300 text-xs flex items-start gap-2">
+            <div className="mt-4 w-full p-2.5 rounded bg-status-amberBg border border-status-amberBorder text-status-amber text-xs flex items-start gap-2 font-mono">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>{scannerError}</span>
+              <span className="text-2xs">{scannerError}</span>
             </div>
           )}
 
-          {/* Manual Entry Fallback (FR-037) */}
-          <form onSubmit={handleManualSubmit} className="mt-4 w-full">
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
-              Manual Token / Pass ID Fallback
+          {/* Manual Fallback */}
+          <form onSubmit={handleManualSubmit} className="mt-5 w-full pt-4 border-t border-white/[0.07]">
+            <label className="block text-2xs font-mono uppercase tracking-wider text-zinc-500 mb-1.5">
+              Manual Token / Pass Reference Entry
             </label>
             <div className="flex gap-2">
               <input
@@ -146,13 +149,14 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                 placeholder="e.g. TKN-A45X9 or VR2045"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                className="flex-1 bg-base border border-white/[0.1] rounded px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-accent"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold tracking-wide transition"
+                className="px-3.5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded font-mono inline-flex items-center gap-1.5 transition-colors"
               >
-                Verify
+                <span>VERIFY</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </form>

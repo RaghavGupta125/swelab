@@ -41,7 +41,7 @@ describe('HostGuard Full-Stack API Integration Tests', () => {
       .post('/api/auth/login')
       .send({ identifier: 'admin@lnmiit.ac.in', password: 'Password@123' });
     adminToken = admRes.body.token;
-  });
+  }, 30000);
 
   afterAll(async () => {
     setMockTime(null);

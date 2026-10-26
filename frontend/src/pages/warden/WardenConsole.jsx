@@ -9,17 +9,24 @@ import {
   Users,
   Clock,
   Search,
-  Filter,
   FileSpreadsheet,
   AlertTriangle,
-  CheckCircle2,
   UserX,
   Briefcase,
   RefreshCw,
-  Calendar,
-  Phone,
-  Home
+  X,
+  Plus,
+  ArrowRight,
+  Filter,
 } from 'lucide-react';
+
+const NAV_TABS = [
+  { id: 'LIVE', label: 'Live Operations', icon: Building2 },
+  { id: 'HISTORY', label: 'Historical Visits', icon: Clock },
+  { id: 'REPORTS', label: 'Daily Analytics', icon: FileSpreadsheet },
+  { id: 'STUDENTS', label: 'Discipline & Status', icon: UserX },
+  { id: 'WORKERS', label: 'Staff Registry', icon: Briefcase },
+];
 
 export const WardenConsole = () => {
   const { user } = useAuth();
@@ -28,7 +35,7 @@ export const WardenConsole = () => {
   const [selectedHostel, setSelectedHostel] = useState(defaultHostel);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('LIVE'); // 'LIVE' | 'HISTORY' | 'REPORTS' | 'STUDENTS' | 'WORKERS'
+  const [activeTab, setActiveTab] = useState('LIVE');
 
   // Overstay Acknowledgment Modal
   const [ackAlertModal, setAckAlertModal] = useState(null);
@@ -42,7 +49,7 @@ export const WardenConsole = () => {
     guardId: '',
     startDate: '',
     endDate: '',
-    overstayOnly: false
+    overstayOnly: false,
   });
   const [historyResults, setHistoryResults] = useState([]);
   const [searchingHistory, setSearchingHistory] = useState(false);
@@ -62,7 +69,7 @@ export const WardenConsole = () => {
     name: '',
     phoneNumber: '',
     workerType: 'PERMANENT',
-    department: 'Housekeeping'
+    department: 'Housekeeping',
   });
 
   useEffect(() => {
@@ -106,7 +113,7 @@ export const WardenConsole = () => {
     try {
       const res = await api.getHistoricalVisits({
         hostelId: selectedHostel,
-        ...historyParams
+        ...historyParams,
       });
       if (res.success && res.data) {
         setHistoryResults(res.data.records || []);
@@ -148,7 +155,7 @@ export const WardenConsole = () => {
     try {
       await api.registerWorker({
         ...workerForm,
-        assignedHostelId: selectedHostel
+        assignedHostelId: selectedHostel,
       });
       setIsWorkerModalOpen(false);
       setWorkerForm({ name: '', phoneNumber: '', workerType: 'PERMANENT', department: 'Housekeeping' });
@@ -158,541 +165,571 @@ export const WardenConsole = () => {
     }
   };
 
+  const overstayAlerts = dashboardData?.overstayAlerts || [];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Top Banner & Hostel Selector */}
-      <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-5 mb-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-blue-950 text-blue-400 border border-blue-800">
-            <Building2 className="w-6 h-6" />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      
+      {/* Top Banner / Hostel Selector */}
+      <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="font-mono text-base font-bold text-zinc-100 uppercase tracking-tight">
+              HOSTEL WARDEN OPERATIONS CENTER
+            </h1>
+            <span className="text-2xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+              {selectedHostel} SECTOR
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-mono text-lg font-bold text-white tracking-wide">
-                HOSTEL WARDEN OPERATIONS CENTER
-              </h1>
-              <span className="text-xs font-mono px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700">
-                {selectedHostel}
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Warden: <strong className="text-slate-200">{user?.name}</strong> · LNMIIT Residential Security
-            </p>
+          <div className="text-2xs font-mono text-zinc-500 mt-0.5">
+            WARDEN: {user?.name} · REAL-TIME FACILITY OVERSIGHT & DISCIPLINARY LOGS
           </div>
         </div>
 
-        {/* Hostel Filter Selector */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-mono text-slate-400 uppercase">Hostel Block:</label>
+        {/* Hostel Selector */}
+        <div className="flex items-center gap-3">
+          <label className="text-2xs font-mono text-zinc-400 uppercase">ZONE SECTOR:</label>
           <select
             value={selectedHostel}
             onChange={(e) => setSelectedHostel(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500"
+            className="bg-base border border-white/[0.1] rounded px-3 py-1.5 text-xs font-mono text-zinc-200 focus:outline-none focus:border-accent"
           >
-            {['BH1', 'BH2', 'BH3', 'BH4', 'BH5', 'GH'].map((h) => (
-              <option key={h} value={h}>{h} ({h === 'GH' ? 'Girls Hostel' : `Boys Hostel ${h.slice(-1)}`})</option>
-            ))}
+            <option value="BH1">BH1 (Boys Hostel 1)</option>
+            <option value="BH2">BH2 (Boys Hostel 2)</option>
+            <option value="BH3">BH3 (Boys Hostel 3)</option>
+            <option value="GH">GH (Girls Hostel)</option>
           </select>
-
           <button
             onClick={loadWardenDashboard}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
-            title="Refresh"
+            className="p-1.5 rounded bg-base hover:bg-white/[0.05] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 transition-colors"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-accent' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* Critical Overstay Alert Banner if any open alerts */}
+      {/* Incident Banner if any overstays */}
       <OverstayAlertBanner
-        overstays={dashboardData?.overstayAlerts || []}
+        overstays={overstayAlerts}
         onAction={() => setActiveTab('LIVE')}
       />
 
-      {/* Primary Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 mb-6 overflow-x-auto text-xs font-semibold">
-        <button
-          onClick={() => setActiveTab('LIVE')}
-          className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-            activeTab === 'LIVE' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Live Occupancy & Overstays</span>
-          {dashboardData?.openOverstayAlertsCount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-mono px-1.5 py-0.2 rounded-full">
-              {dashboardData.openOverstayAlertsCount}
-            </span>
-          )}
-        </button>
+      {/* Studio Workspace Layout: Sidebar + Main Stage */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-        <button
-          onClick={() => {
-            setActiveTab('HISTORY');
-            handleSearchHistory();
-          }}
-          className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-            activeTab === 'HISTORY' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <Search className="w-4 h-4" />
-          <span>Search Visit History (FR-049)</span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveTab('REPORTS');
-            handleGenerateReport();
-          }}
-          className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-            activeTab === 'REPORTS' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <FileSpreadsheet className="w-4 h-4" />
-          <span>Daily Traffic Audit (FR-051)</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('STUDENTS')}
-          className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-            activeTab === 'STUDENTS' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <UserX className="w-4 h-4" />
-          <span>Disciplinary Status</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('WORKERS')}
-          className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-            activeTab === 'WORKERS' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <Briefcase className="w-4 h-4" />
-          <span>Staff Registry</span>
-        </button>
-      </div>
-
-      {/* Tab 1: Live Occupancy & Alerts */}
-      {activeTab === 'LIVE' && (
-        <div className="space-y-6">
-          {/* Key Operational KPI Metric Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-4 shadow">
-              <span className="text-[11px] font-mono text-slate-400 uppercase">Active Inside Visitors</span>
-              <div className="text-2xl font-bold font-mono text-white mt-1">
-                {dashboardData?.activeVisitorsCount || 0}
-              </div>
-              <span className="text-[10px] text-slate-500">Currently within {selectedHostel}</span>
-            </div>
-
-            <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-4 shadow">
-              <span className="text-[11px] font-mono text-slate-400 uppercase">Overstay Violations</span>
-              <div className={`text-2xl font-bold font-mono mt-1 ${dashboardData?.openOverstayAlertsCount > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                {dashboardData?.openOverstayAlertsCount || 0}
-              </div>
-              <span className="text-[10px] text-slate-500">Exceeded permitted departure</span>
-            </div>
-
-            <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-4 shadow">
-              <span className="text-[11px] font-mono text-slate-400 uppercase">Guards On Duty</span>
-              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-                {dashboardData?.activeGuardsOnDuty?.length || 0}
-              </div>
-              <span className="text-[10px] text-slate-500">Active shift attendance logged</span>
-            </div>
-
-            <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-4 shadow">
-              <span className="text-[11px] font-mono text-slate-400 uppercase">Daily Gate Traffic</span>
-              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
-                {dashboardData?.dailySummary?.totalEntries || 0}
-              </div>
-              <span className="text-[10px] text-slate-500">Total entries recorded today</span>
-            </div>
+        {/* Sidebar Nav (3 cols) */}
+        <div className="md:col-span-3 space-y-1">
+          <div className="text-2xs font-mono uppercase tracking-wider text-zinc-500 px-3 py-1 mb-1">
+            CONTROL DOMAINS
           </div>
+          {NAV_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded text-xs font-mono font-medium transition-colors text-left ${
+                  active
+                    ? 'bg-accent/15 text-accent border border-accent/30 font-semibold'
+                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span>{tab.label}</span>
+                {tab.id === 'LIVE' && overstayAlerts.length > 0 && (
+                  <span className="ml-auto w-2 h-2 rounded-full bg-status-red animate-pulse-subtle" />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Active Overstay Alerts Table (FR-039, FR-040) */}
-          <div className="bg-hg-slate-900 border border-red-900/50 rounded-xl overflow-hidden shadow-xl">
-            <div className="p-4 bg-red-950/40 border-b border-red-900/60 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
-                <h3 className="font-bold text-red-200 text-sm">
-                  Active Overstay Alerts Queue ({dashboardData?.overstayAlerts?.length || 0})
-                </h3>
-              </div>
-              <span className="text-[10px] font-mono text-red-300">Auto-calculated past 19:00 or scheduled exit</span>
-            </div>
+        {/* Main Workspace Stage (9 cols) */}
+        <div className="md:col-span-9 space-y-6">
 
-            <div className="divide-y divide-slate-800">
-              {dashboardData?.overstayAlerts?.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-400">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5" />
-                  <span>No active overstay violations in {selectedHostel}.</span>
+          {/* TAB 1: LIVE OPERATIONS */}
+          {activeTab === 'LIVE' && (
+            <div className="space-y-6">
+              
+              {/* 2x2 Metric Cards Grid */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                  <div className="text-2xs font-mono text-zinc-500 uppercase">ACTIVE INSIDE</div>
+                  <div className="text-2xl font-mono font-bold text-zinc-100 mt-1">
+                    {dashboardData?.occupancy?.currentlyInsideVisitors || 0}
+                  </div>
+                  <div className="text-[10px] font-mono text-zinc-500 mt-1">PEOPLE AT GATE</div>
                 </div>
-              ) : (
-                dashboardData.overstayAlerts.map((alt) => (
-                  <div key={alt.alertId} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-red-950/20 hover:bg-red-950/30 transition">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-white text-sm">{alt.visitorName}</span>
-                        <StatusBadge status="OVERSTAY" />
-                        <span className="font-mono text-xs text-slate-400">Host: <strong className="text-blue-400">{alt.studentRollNumber}</strong></span>
-                      </div>
-                      <div className="text-xs text-slate-400 flex items-center gap-4">
-                        <span>Expected Exit: <strong className="text-red-300">{new Date(alt.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
-                        <span>Detected At: {new Date(alt.detectedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </div>
 
+                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                  <div className="text-2xs font-mono text-zinc-500 uppercase">OVERSTAY INCIDENTS</div>
+                  <div
+                    className={`text-2xl font-mono font-bold mt-1 ${
+                      overstayAlerts.length > 0 ? 'text-status-red' : 'text-zinc-100'
+                    }`}
+                  >
+                    {overstayAlerts.length}
+                  </div>
+                  <div className="text-[10px] font-mono text-zinc-500 mt-1">PAST EXIT WINDOW</div>
+                </div>
+
+                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                  <div className="text-2xs font-mono text-zinc-500 uppercase">ON-DUTY GUARDS</div>
+                  <div className="text-2xl font-mono font-bold text-status-green mt-1">
+                    {dashboardData?.activeGuards?.length || 0}
+                  </div>
+                  <div className="text-[10px] font-mono text-zinc-500 mt-1">ACTIVE SHIFTS</div>
+                </div>
+
+                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                  <div className="text-2xs font-mono text-zinc-500 uppercase">TODAY'S ADMISSIONS</div>
+                  <div className="text-2xl font-mono font-bold text-zinc-100 mt-1">
+                    {dashboardData?.occupancy?.totalTodayVisits || 0}
+                  </div>
+                  <div className="text-[10px] font-mono text-zinc-500 mt-1">COMPLETED ENTRIES</div>
+                </div>
+              </div>
+
+              {/* Overstay Alert Queue */}
+              {overstayAlerts.length > 0 && (
+                <div className="bg-[#111115] border border-status-redBorder rounded-lg p-5 space-y-3">
+                  <div className="flex items-center justify-between pb-3 border-b border-status-redBorder/40">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-status-red animate-pulse-subtle" />
+                      <span className="text-2xs font-mono font-bold uppercase tracking-wider text-status-red">
+                        ACTIVE OVERSTAY INCIDENT QUEUE (BR-010)
+                      </span>
+                    </div>
+                    <span className="text-2xs font-mono text-status-red">ACTION REQUIRED</span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-2xs font-mono">
+                      <thead>
+                        <tr className="border-b border-white/[0.06] text-zinc-500">
+                          <th className="p-2.5">ALERT ID</th>
+                          <th className="p-2.5">VISITOR NAME</th>
+                          <th className="p-2.5">HOST ROLL</th>
+                          <th className="p-2.5">EXPECTED OUT</th>
+                          <th className="p-2.5">SEVERITY</th>
+                          <th className="p-2.5 text-right">ACTION</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.04]">
+                        {overstayAlerts.map((alt) => (
+                          <tr key={alt.alertId} className="hover:bg-white/[0.02]">
+                            <td className="p-2.5 text-status-red font-bold">{alt.alertId}</td>
+                            <td className="p-2.5 text-zinc-200 font-semibold">{alt.visitorName}</td>
+                            <td className="p-2.5 text-blue-400">{alt.hostStudentRollNumber}</td>
+                            <td className="p-2.5 text-zinc-400">
+                              {new Date(alt.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="p-2.5">
+                              <span className="px-1.5 py-0.5 rounded bg-status-redBg border border-status-redBorder text-status-red font-bold">
+                                CRITICAL
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-right">
+                              <button
+                                onClick={() => {
+                                  setAckAlertModal(alt);
+                                  setAckNotes('');
+                                }}
+                                className="px-2.5 py-1 bg-status-red hover:bg-red-600 text-white rounded text-2xs font-bold transition-colors"
+                              >
+                                ACKNOWLEDGE
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Active Inside Visitors Table */}
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-3">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+                    VISITORS PRESENTLY OCCUPYING {selectedHostel}
+                  </span>
+                  <span className="text-2xs font-mono text-zinc-600">FR-039</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-2xs font-mono">
+                    <thead>
+                      <tr className="border-b border-white/[0.06] text-zinc-500">
+                        <th className="p-2.5">VISIT ID</th>
+                        <th className="p-2.5">VISITOR</th>
+                        <th className="p-2.5">HOST ROLL</th>
+                        <th className="p-2.5">ENTRY TIME</th>
+                        <th className="p-2.5">EXPECTED EXIT</th>
+                        <th className="p-2.5">STATE</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {(!dashboardData?.activeInsideVisitors || dashboardData.activeInsideVisitors.length === 0) ? (
+                        <tr>
+                          <td colSpan={6} className="p-6 text-center text-zinc-600">
+                            NO REGISTERED GUESTS CURRENTLY INSIDE SECTOR
+                          </td>
+                        </tr>
+                      ) : (
+                        dashboardData.activeInsideVisitors.map((rec) => (
+                          <tr key={rec.visitId} className="hover:bg-white/[0.02]">
+                            <td className="p-2.5 text-zinc-400">{rec.visitId}</td>
+                            <td className="p-2.5">
+                              <div className="text-zinc-200 font-semibold">{rec.visitorName}</div>
+                              <div className="text-zinc-500 text-[10px]">{rec.visitorPhone}</div>
+                            </td>
+                            <td className="p-2.5 text-blue-400">{rec.hostStudentRollNumber}</td>
+                            <td className="p-2.5 text-zinc-300">
+                              {new Date(rec.actualEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="p-2.5 text-zinc-300">
+                              {new Date(rec.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="p-2.5">
+                              <StatusBadge status={rec.overstayStatus ? 'OVERSTAY' : 'ACTIVE'} />
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 2: HISTORICAL VISITS */}
+          {activeTab === 'HISTORY' && (
+            <div className="space-y-4">
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5">
+                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block mb-3">
+                  PARAMETRIC SEARCH ARCHIVE (FR-040)
+                </span>
+
+                <form onSubmit={handleSearchHistory} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="form-label">STUDENT ROLL NUMBER</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 24UCS049"
+                      value={historyParams.studentRollNumber}
+                      onChange={(e) => setHistoryParams({ ...historyParams, studentRollNumber: e.target.value })}
+                      className="form-input text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">VISITOR NAME</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sharma"
+                      value={historyParams.visitorName}
+                      onChange={(e) => setHistoryParams({ ...historyParams, visitorName: e.target.value })}
+                      className="form-input text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">START DATE</label>
+                    <input
+                      type="date"
+                      value={historyParams.startDate}
+                      onChange={(e) => setHistoryParams({ ...historyParams, startDate: e.target.value })}
+                      className="form-input text-xs font-mono"
+                    />
+                  </div>
+                  <div className="sm:col-span-2 flex items-center gap-2 pt-2">
+                    <label className="flex items-center gap-2 text-2xs font-mono text-zinc-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={historyParams.overstayOnly}
+                        onChange={(e) => setHistoryParams({ ...historyParams, overstayOnly: e.target.checked })}
+                        className="rounded border-white/20 bg-base text-accent"
+                      />
+                      <span>OVERSTAY VIOLATIONS ONLY</span>
+                    </label>
+                  </div>
+                  <div className="flex justify-end pt-2">
                     <button
-                      onClick={() => setAckAlertModal(alt)}
-                      className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold self-start sm:self-center transition shadow"
+                      type="submit"
+                      disabled={searchingHistory}
+                      className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-2 transition-colors"
                     >
-                      Acknowledge & Record Action
+                      <Search className="w-3.5 h-3.5" />
+                      <span>{searchingHistory ? 'SEARCHING...' : 'RUN QUERY'}</span>
                     </button>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
+                </form>
+              </div>
 
-          {/* Active Visitors Table */}
-          <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl overflow-hidden shadow-xl">
-            <div className="p-4 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
-              <h3 className="font-bold text-white text-sm">
-                Visitors Currently Inside {selectedHostel} ({dashboardData?.activeVisitors?.length || 0})
-              </h3>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 font-mono text-[11px] uppercase border-b border-slate-800">
-                  <tr>
-                    <th className="p-3">Visitor Name</th>
-                    <th className="p-3">Phone</th>
-                    <th className="p-3">Host Student</th>
-                    <th className="p-3">Entry Time</th>
-                    <th className="p-3">Expected Exit</th>
-                    <th className="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-300">
-                  {dashboardData?.activeVisitors?.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="p-6 text-center text-slate-500">No visitors currently inside.</td>
+              {/* Results Table */}
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg overflow-x-auto">
+                <table className="w-full text-left text-2xs font-mono">
+                  <thead>
+                    <tr className="border-b border-white/[0.06] text-zinc-500 bg-base">
+                      <th className="p-3">VISIT ID</th>
+                      <th className="p-3">VISITOR</th>
+                      <th className="p-3">HOST ROLL</th>
+                      <th className="p-3">ENTRY</th>
+                      <th className="p-3">EXIT</th>
+                      <th className="p-3">STATUS</th>
                     </tr>
-                  ) : (
-                    dashboardData.activeVisitors.map((v) => (
-                      <tr key={v.visitId} className={v.overstayStatus ? 'bg-red-950/20' : 'hover:bg-slate-850/40'}>
-                        <td className="p-3 font-semibold text-white">{v.visitorName} ({v.totalVisitorCount})</td>
-                        <td className="p-3 font-mono">{v.visitorPhone}</td>
-                        <td className="p-3 font-mono text-blue-400 font-semibold">{v.hostStudentRollNumber}</td>
-                        <td className="p-3 font-mono">{new Date(v.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                        <td className="p-3 font-mono text-slate-400">{new Date(v.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                        <td className="p-3">{v.overstayStatus ? <StatusBadge status="OVERSTAY" /> : <StatusBadge status="ACTIVE" />}</td>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.04]">
+                    {historyResults.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-zinc-600">
+                          ENTER QUERY PARAMETERS OR EXECUTE SEARCH TO VIEW LOGS
+                        </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab 2: Historical Visit Query (FR-049, FR-050) */}
-      {activeTab === 'HISTORY' && (
-        <div className="space-y-6">
-          <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-5 shadow-xl">
-            <h3 className="font-bold text-white text-sm mb-4 flex items-center gap-2">
-              <Filter className="w-4 h-4 text-blue-400" />
-              <span>Multi-Criteria Historical Visit Search</span>
-            </h3>
-
-            <form onSubmit={handleSearchHistory} className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">Host Roll No.</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 24UCS049"
-                  value={historyParams.studentRollNumber}
-                  onChange={(e) => setHistoryParams({ ...historyParams, studentRollNumber: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">Visitor Name</label>
-                <input
-                  type="text"
-                  placeholder="Visitor name"
-                  value={historyParams.visitorName}
-                  onChange={(e) => setHistoryParams({ ...historyParams, visitorName: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">Guard ID</label>
-                <input
-                  type="text"
-                  placeholder="e.g. G012"
-                  value={historyParams.guardId}
-                  onChange={(e) => setHistoryParams({ ...historyParams, guardId: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">Start Date</label>
-                <input
-                  type="date"
-                  value={historyParams.startDate}
-                  onChange={(e) => setHistoryParams({ ...historyParams, startDate: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">End Date</label>
-                <input
-                  type="date"
-                  value={historyParams.endDate}
-                  onChange={(e) => setHistoryParams({ ...historyParams, endDate: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
-                />
-              </div>
-
-              <div className="flex items-end gap-2">
-                <button
-                  type="submit"
-                  disabled={searchingHistory}
-                  className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Search</span>
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Results Table */}
-          <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl overflow-hidden shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 font-mono text-[11px] uppercase border-b border-slate-800">
-                  <tr>
-                    <th className="p-3">Visit ID</th>
-                    <th className="p-3">Visitor</th>
-                    <th className="p-3">Host Roll</th>
-                    <th className="p-3">Entry Time</th>
-                    <th className="p-3">Exit Time</th>
-                    <th className="p-3">Duration</th>
-                    <th className="p-3">Guard</th>
-                    <th className="p-3">Overstay</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-300">
-                  {historyResults.length === 0 ? (
-                    <tr>
-                      <td colSpan="8" className="p-6 text-center text-slate-500">No visit records matching query.</td>
-                    </tr>
-                  ) : (
-                    historyResults.map((rec) => (
-                      <tr key={rec.visitId} className="hover:bg-slate-850/40">
-                        <td className="p-3 font-mono text-slate-400">{rec.visitId}</td>
-                        <td className="p-3 font-semibold text-white">{rec.visitorName}</td>
-                        <td className="p-3 font-mono text-blue-400">{rec.hostStudentRollNumber}</td>
-                        <td className="p-3 font-mono">{new Date(rec.entryTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
-                        <td className="p-3 font-mono">{rec.exitTime ? new Date(rec.exitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Active'}</td>
-                        <td className="p-3">{rec.stayDurationMinutes ? `${rec.stayDurationMinutes} mins` : '-'}</td>
-                        <td className="p-3 font-mono text-slate-400">{rec.guardId}</td>
-                        <td className="p-3">{rec.overstayStatus ? <StatusBadge status="OVERSTAY" /> : <span className="text-emerald-400">Normal</span>}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab 3: Daily Summary Report (FR-051) */}
-      {activeTab === 'REPORTS' && (
-        <div className="space-y-6">
-          <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-5 shadow-xl flex items-center justify-between gap-4">
-            <div>
-              <h3 className="font-bold text-white text-sm">Automated Daily Hostel Traffic Report</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Aggregated visitor density and security compliance metrics.</p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={reportDate}
-                onChange={(e) => setReportDate(e.target.value)}
-                className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white"
-              />
-              <button
-                onClick={handleGenerateReport}
-                disabled={generatingReport}
-                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Generate</span>
-              </button>
-            </div>
-          </div>
-
-          {dailyReportData && (
-            <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-              <div className="border-b border-slate-800 pb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-bold text-white font-mono">
-                    DAILY VISITOR AUDIT REPORT · {dailyReportData.hostelId}
-                  </h2>
-                  <span className="text-xs text-slate-400">Date: {dailyReportData.reportDate}</span>
-                </div>
-                <button
-                  onClick={() => window.print()}
-                  className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold transition"
-                >
-                  Print / Export Summary
-                </button>
-              </div>
-
-              {/* Summary Metrics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <span className="text-[10px] uppercase font-mono text-slate-500">Total Gate Entries</span>
-                  <div className="text-2xl font-bold font-mono text-white mt-1">
-                    {dailyReportData.summary.totalEntries}
-                  </div>
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <span className="text-[10px] uppercase font-mono text-slate-500">Total Check-Outs</span>
-                  <div className="text-2xl font-bold font-mono text-white mt-1">
-                    {dailyReportData.summary.totalExits}
-                  </div>
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <span className="text-[10px] uppercase font-mono text-slate-500">Overstay Violations</span>
-                  <div className="text-2xl font-bold font-mono text-red-400 mt-1">
-                    {dailyReportData.summary.overstayCount}
-                  </div>
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <span className="text-[10px] uppercase font-mono text-slate-500">Approved Requests</span>
-                  <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-                    {dailyReportData.summary.approvedRequests}
-                  </div>
-                </div>
+                    ) : (
+                      historyResults.map((r) => (
+                        <tr key={r.visitId} className="hover:bg-white/[0.02]">
+                          <td className="p-3 text-zinc-400 font-bold">{r.visitId}</td>
+                          <td className="p-3 text-zinc-200">{r.visitorName}</td>
+                          <td className="p-3 text-blue-400">{r.hostStudentRollNumber}</td>
+                          <td className="p-3 text-zinc-300">{new Date(r.actualEntryTime).toLocaleString()}</td>
+                          <td className="p-3 text-zinc-300">
+                            {r.actualExitTime ? new Date(r.actualExitTime).toLocaleString() : 'STILL INSIDE'}
+                          </td>
+                          <td className="p-3">
+                            <StatusBadge status={r.overstayStatus ? 'OVERSTAY' : (r.actualExitTime ? 'CONSUMED' : 'ACTIVE')} />
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Tab 4: Student Disciplinary Status (FR-006, BR-002) */}
-      {activeTab === 'STUDENTS' && (
-        <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-6 shadow-xl space-y-4 max-w-xl">
-          <h3 className="font-bold text-white text-base">Host Student Disciplinary Status Management</h3>
-          <p className="text-xs text-slate-400">
-            Enforce BR-002: Blocked students are strictly prohibited from receiving or approving visitor requests.
-          </p>
+          {/* TAB 3: DAILY ANALYTICS / REPORTS */}
+          {activeTab === 'REPORTS' && (
+            <div className="space-y-4">
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block">
+                    DAILY AUDIT & SUMMARY REPORT (FR-043)
+                  </span>
+                  <div className="text-2xs font-mono text-zinc-500 mt-0.5">
+                    GENERATE VERIFIED ACCESS METRICS FOR SELECTED DATE
+                  </div>
+                </div>
 
-          <div className="space-y-3 pt-2">
-            <div>
-              <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">Student Roll Number</label>
-              <input
-                type="text"
-                placeholder="e.g. 24UCS049"
-                value={studentSearchRoll}
-                onChange={(e) => setStudentSearchRoll(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white uppercase"
-              />
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => handleStudentStatusChange('ACTIVE')}
-                className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
-              >
-                Set ACTIVE
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStudentStatusChange('INACTIVE')}
-                className="flex-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition"
-              >
-                Set INACTIVE
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStudentStatusChange('BLOCKED')}
-                className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition"
-              >
-                BLOCK STUDENT (BR-002)
-              </button>
-            </div>
-
-            {studentActionMsg && (
-              <div className="mt-3 p-3 bg-slate-950 rounded-lg border border-slate-800 text-xs text-blue-400 font-mono">
-                {studentActionMsg}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={reportDate}
+                    onChange={(e) => setReportDate(e.target.value)}
+                    className="bg-base border border-white/[0.1] rounded px-3 py-1.5 text-xs font-mono text-zinc-200"
+                  />
+                  <button
+                    onClick={handleGenerateReport}
+                    disabled={generatingReport}
+                    className="px-4 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>{generatingReport ? 'COMPILING...' : 'GENERATE'}</span>
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Tab 5: Worker Registry */}
-      {activeTab === 'WORKERS' && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold text-white text-sm">Campus Maintenance Staff Registry · {selectedHostel}</h3>
-            <button
-              onClick={() => setIsWorkerModalOpen(true)}
-              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition"
-            >
-              + Register New Worker
-            </button>
-          </div>
+              {dailyReportData && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                      <div className="text-2xs font-mono text-zinc-500">TOTAL VISITS</div>
+                      <div className="text-xl font-mono font-bold text-zinc-100 mt-1">
+                        {dailyReportData.summary?.totalVisits || 0}
+                      </div>
+                    </div>
+                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                      <div className="text-2xs font-mono text-zinc-500">TOTAL INDIVIDUALS</div>
+                      <div className="text-xl font-mono font-bold text-zinc-100 mt-1">
+                        {dailyReportData.summary?.totalVisitorsCount || 0}
+                      </div>
+                    </div>
+                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                      <div className="text-2xs font-mono text-zinc-500">OVERSTAYS</div>
+                      <div className="text-xl font-mono font-bold text-status-red mt-1">
+                        {dailyReportData.summary?.overstayCount || 0}
+                      </div>
+                    </div>
+                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                      <div className="text-2xs font-mono text-zinc-500">AVG DURATION</div>
+                      <div className="text-xl font-mono font-bold text-zinc-100 mt-1">
+                        {dailyReportData.summary?.averageDurationMinutes || 0}m
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 4: STUDENT DISCIPLINARY STATUS */}
+          {activeTab === 'STUDENTS' && (
+            <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-4">
+              <div>
+                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block">
+                  STUDENT DISCIPLINARY STATUS MANAGEMENT (BR-002)
+                </span>
+                <p className="text-2xs font-mono text-zinc-500 mt-0.5">
+                  Blocked or suspended students cannot approve visitor requests or host campus guests.
+                </p>
+              </div>
+
+              <div className="max-w-md space-y-3 pt-2">
+                <div>
+                  <label className="form-label">STUDENT ROLL NUMBER</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 24UCS049"
+                    value={studentSearchRoll}
+                    onChange={(e) => setStudentSearchRoll(e.target.value)}
+                    className="form-input text-xs font-mono"
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-2">
+                  <button
+                    onClick={() => handleStudentStatusChange('ACTIVE')}
+                    className="flex-1 py-2 bg-status-green hover:bg-green-600 text-black text-2xs font-mono font-bold rounded transition-colors"
+                  >
+                    SET ACTIVE
+                  </button>
+                  <button
+                    onClick={() => handleStudentStatusChange('SUSPENDED')}
+                    className="flex-1 py-2 bg-status-amberBg hover:bg-status-amber text-status-amber hover:text-black border border-status-amberBorder text-2xs font-mono font-bold rounded transition-colors"
+                  >
+                    SET SUSPENDED
+                  </button>
+                  <button
+                    onClick={() => handleStudentStatusChange('BLOCKED')}
+                    className="flex-1 py-2 bg-status-redBg hover:bg-status-red text-status-red hover:text-white border border-status-redBorder text-2xs font-mono font-bold rounded transition-colors"
+                  >
+                    BLOCK HOST
+                  </button>
+                </div>
+
+                {studentActionMsg && (
+                  <div className="p-2.5 rounded bg-base border border-white/[0.08] text-2xs font-mono text-zinc-300">
+                    {studentActionMsg}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: STAFF REGISTRY */}
+          {activeTab === 'WORKERS' && (
+            <div className="space-y-4">
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex items-center justify-between">
+                <div>
+                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block">
+                    SERVICE WORKER & CONTRACTOR DIRECTORY (FR-045)
+                  </span>
+                  <div className="text-2xs font-mono text-zinc-500 mt-0.5">
+                    AUTHORIZED MAINTENANCE, ELECTRICAL & HOUSEKEEPING PERSONNEL
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsWorkerModalOpen(true)}
+                  className="px-3.5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>REGISTER WORKER</span>
+                </button>
+              </div>
+
+              {/* Workers Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {(!dashboardData?.workers || dashboardData.workers.length === 0) ? (
+                  <div className="col-span-3 p-8 bg-[#111115] border border-white/[0.06] rounded-lg text-center text-2xs font-mono text-zinc-600">
+                    NO WORKERS ENROLLED IN SECTOR
+                  </div>
+                ) : (
+                  dashboardData.workers.map((w) => (
+                    <div
+                      key={w.workerId}
+                      className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg flex flex-col justify-between space-y-2"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xs font-mono text-zinc-500">{w.workerId}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+                            {w.workerType}
+                          </span>
+                        </div>
+                        <div className="text-xs font-bold text-zinc-100 mt-1">{w.fullName}</div>
+                        <div className="text-2xs font-mono text-zinc-400">{w.department} · {w.phoneNumber}</div>
+                      </div>
+                      <div className="pt-2 border-t border-white/[0.05] text-[10px] font-mono">
+                        <span className={w.currentlyInside ? 'text-status-green font-bold' : 'text-zinc-500'}>
+                          {w.currentlyInside ? '● CURRENTLY INSIDE' : '○ OUTSIDE HOSTEL'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
-      )}
+      </div>
 
       {/* Acknowledge Alert Modal */}
       {ackAlertModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-xl p-6 shadow-2xl">
-            <h3 className="font-bold text-white text-base mb-2">Acknowledge Overstay Incident</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Visitor <strong>{ackAlertModal.visitorName}</strong> hosted by student <strong>{ackAlertModal.studentRollNumber}</strong> exceeded their visit duration.
-            </p>
-            <form onSubmit={handleAcknowledgeAlert}>
-              <textarea
-                rows="3"
-                value={ackNotes}
-                onChange={(e) => setAckNotes(e.target.value)}
-                placeholder="Enter resolution notes (e.g., Gate security dispatched to Room B-201, student notified)."
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 mb-4"
-              ></textarea>
-              <div className="flex justify-end gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-status-red">
+                ACKNOWLEDGE OVERSTAY #{ackAlertModal.alertId}
+              </span>
+              <button onClick={() => setAckAlertModal(null)} className="text-zinc-500 hover:text-zinc-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAcknowledgeAlert} className="p-5 space-y-4">
+              <p className="text-2xs font-mono text-zinc-400">
+                Acknowledge overstay incident for visitor <strong className="text-zinc-200">{ackAlertModal.visitorName}</strong>. This logs disciplinary review notes into institutional audit trail (BR-010).
+              </p>
+
+              <div>
+                <label className="form-label">WARDEN RESOLUTION NOTES</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={ackNotes}
+                  onChange={(e) => setAckNotes(e.target.value)}
+                  placeholder="e.g. Guard dispatched to room B-201. Visitor escorted off premises."
+                  className="form-input text-xs font-mono resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => setAckAlertModal(null)}
-                  className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold"
+                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
                   disabled={acking}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
+                  className="px-4 py-2 bg-status-red hover:bg-red-600 text-white rounded text-xs font-mono font-semibold transition-colors disabled:opacity-50"
                 >
-                  {acking ? 'Acknowledging...' : 'Acknowledge Incident'}
+                  {acking ? 'LOGGING...' : 'ACKNOWLEDGE INCIDENT'}
                 </button>
               </div>
             </form>
@@ -702,72 +739,87 @@ export const WardenConsole = () => {
 
       {/* Register Worker Modal */}
       {isWorkerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-xl p-6 shadow-2xl">
-            <h3 className="font-bold text-white text-base mb-2">Register Maintenance Staff</h3>
-            <form onSubmit={handleRegisterWorker} className="space-y-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-200">
+                REGISTER SERVICE WORKER
+              </span>
+              <button onClick={() => setIsWorkerModalOpen(false)} className="text-zinc-500 hover:text-zinc-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterWorker} className="p-5 space-y-4">
               <div>
-                <label className="block text-[11px] font-mono text-slate-400 mb-1">Full Name</label>
+                <label className="form-label">FULL NAME</label>
                 <input
                   type="text"
                   required
                   value={workerForm.name}
                   onChange={(e) => setWorkerForm({ ...workerForm, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+                  placeholder="e.g. Mohan Lal"
+                  className="form-input text-xs font-mono"
                 />
               </div>
+
               <div>
-                <label className="block text-[11px] font-mono text-slate-400 mb-1">Phone Number</label>
+                <label className="form-label">PHONE NUMBER</label>
                 <input
                   type="tel"
                   required
                   value={workerForm.phoneNumber}
                   onChange={(e) => setWorkerForm({ ...workerForm, phoneNumber: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+                  placeholder="e.g. 9829012345"
+                  className="form-input text-xs font-mono"
                 />
               </div>
+
               <div>
-                <label className="block text-[11px] font-mono text-slate-400 mb-1">Worker Category (FR-047)</label>
+                <label className="form-label">WORKER CATEGORY</label>
                 <select
                   value={workerForm.workerType}
                   onChange={(e) => setWorkerForm({ ...workerForm, workerType: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+                  className="form-input text-xs font-mono"
                 >
                   <option value="PERMANENT">PERMANENT</option>
                   <option value="CONTRACT">CONTRACT</option>
                   <option value="DAILY">DAILY</option>
                 </select>
               </div>
+
               <div>
-                <label className="block text-[11px] font-mono text-slate-400 mb-1">Department</label>
+                <label className="form-label">DEPARTMENT / TRADE</label>
                 <input
                   type="text"
                   required
                   value={workerForm.department}
                   onChange={(e) => setWorkerForm({ ...workerForm, department: e.target.value })}
-                  placeholder="e.g. Electrical / Housekeeping"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+                  placeholder="e.g. Electrical / Housekeeping / Plumbing"
+                  className="form-input text-xs font-mono"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => setIsWorkerModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs"
+                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded text-xs font-mono font-semibold transition-colors"
                 >
-                  Register Staff
+                  ENROLL STAFF
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

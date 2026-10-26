@@ -6,11 +6,10 @@ import { StatusBadge } from '../../components/StatusBadge.jsx';
 import {
   Camera,
   Search,
-  CheckCircle,
+  CheckCircle2,
   LogOut,
   LogIn,
-  AlertTriangle,
-  UserCheck,
+  AlertCircle,
   Shield,
   Clock,
   Users,
@@ -19,7 +18,9 @@ import {
   Phone,
   Home,
   Check,
-  X
+  X,
+  User,
+  ArrowRight,
 } from 'lucide-react';
 
 export const GateConsole = () => {
@@ -47,11 +48,12 @@ export const GateConsole = () => {
   const [workersList, setWorkersList] = useState([]);
   const [loadingActive, setLoadingActive] = useState(false);
 
-  // Load shift status and active visitors on mount
   useEffect(() => {
     loadShiftStatus();
     loadActiveVisitors();
     loadWorkers();
+    const interval = setInterval(loadActiveVisitors, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadShiftStatus = async () => {
@@ -99,21 +101,20 @@ export const GateConsole = () => {
         const res = await api.checkOutShift();
         setShiftActive(false);
         setAttendanceRecord(res.attendance);
-        setGateActionStatus({ type: 'success', message: 'Duty shift checked out. Gate operations locked.' });
+        setGateActionStatus({ type: 'success', message: 'Duty shift logged out. Gate clearance locked.' });
       } else {
         const res = await api.checkInShift(guardHostel);
         setShiftActive(true);
         setAttendanceRecord(res.attendance);
-        setGateActionStatus({ type: 'success', message: 'Shift checked in successfully. Gate duty active.' });
+        setGateActionStatus({ type: 'success', message: 'Shift logged in. Gate operational clearance active.' });
       }
     } catch (err) {
-      setGateActionStatus({ type: 'error', message: err.message || 'Failed to toggle shift.' });
+      setGateActionStatus({ type: 'error', message: err.message || 'Failed to toggle duty shift.' });
     } finally {
       setShiftLoading(false);
     }
   };
 
-  // Perform pass verification via scanned token or search query (FR-029)
   const handleVerifyPass = async (queryInput) => {
     const query = (queryInput || searchQuery).trim();
     if (!query) return;
@@ -131,7 +132,6 @@ export const GateConsole = () => {
       } else if (/^\d{10}$/.test(query) || query.startsWith('+')) {
         params.phone = query;
       } else {
-        // Assume roll number or general token
         params.rollNumber = query;
       }
 
@@ -143,13 +143,12 @@ export const GateConsole = () => {
         }
       }
     } catch (err) {
-      setGateActionStatus({ type: 'error', message: err.message || 'Pass verification failed.' });
+      setGateActionStatus({ type: 'error', message: err.message || 'Pass verification query failed.' });
     } finally {
       setVerifying(false);
     }
   };
 
-  // Check-In Visitor (FR-032)
   const handleCheckIn = async () => {
     if (!verifiedPassData?.visitRequest) return;
     setGateActionStatus({ type: '', message: '' });
@@ -158,54 +157,52 @@ export const GateConsole = () => {
       const res = await api.recordGateCheckIn({
         requestId: verifiedPassData.visitRequest.requestId,
         passToken: verifiedPassData.qrPass?.token,
-        hostelId: guardHostel
+        hostelId: guardHostel,
       });
 
       setGateActionStatus({
         type: 'success',
-        message: `CHECK-IN SUCCESS: ${res.visitRecord.visitorName} entered ${guardHostel}.`
+        message: `CLEARED ENTRY: ${res.visitRecord.visitorName} admitted into ${guardHostel}.`,
       });
 
       setVerifiedPassData(null);
       setSearchQuery('');
       loadActiveVisitors();
     } catch (err) {
-      setGateActionStatus({ type: 'error', message: err.message || 'Check-In failed.' });
+      setGateActionStatus({ type: 'error', message: err.message || 'Check-In operation rejected.' });
     }
   };
 
-  // Check-Out Visitor (FR-035)
   const handleCheckOut = async (visitRecord) => {
     setGateActionStatus({ type: '', message: '' });
 
     try {
       const res = await api.recordGateCheckOut({
         visitId: visitRecord.visitId,
-        requestId: visitRecord.requestId
+        requestId: visitRecord.requestId,
       });
 
       const isOverstay = res.visitRecord.overstayStatus;
       setGateActionStatus({
         type: isOverstay ? 'warning' : 'success',
-        message: `CHECK-OUT SUCCESS: ${res.visitRecord.visitorName} left the hostel.${
-          isOverstay ? ' (OVERSTAY VIOLATION LOGGED)' : ''
-        }`
+        message: `EXIT LOGGED: ${res.visitRecord.visitorName} departed.${
+          isOverstay ? ' (OVERSTAY VIOLATION INCIDENT RECORDED)' : ''
+        }`,
       });
 
       setVerifiedPassData(null);
       loadActiveVisitors();
     } catch (err) {
-      setGateActionStatus({ type: 'error', message: err.message || 'Check-Out failed.' });
+      setGateActionStatus({ type: 'error', message: err.message || 'Check-Out operation failed.' });
     }
   };
 
-  // Worker Entry / Exit toggle (FR-047, FR-048)
   const handleWorkerActivity = async (workerId, action) => {
     setGateActionStatus({ type: '', message: '' });
     try {
       const res = await api.logWorkerActivity({
         workerId,
-        action
+        action,
       });
       setGateActionStatus({ type: 'success', message: res.data.message });
       loadWorkers();
@@ -215,276 +212,338 @@ export const GateConsole = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Terminal Status Bar */}
-      <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-lg ${shiftActive ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-red-950 text-red-400 border border-red-800'}`}>
-            <Shield className="w-6 h-6" />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      
+      {/* Security Terminal Ops Bar */}
+      <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="relative">
+            <div
+              className={`w-3 h-3 rounded-full ${
+                shiftActive ? 'bg-status-green animate-led-blink shadow-[0_0_8px_#22C55E]' : 'bg-status-red shadow-[0_0_8px_#EF4444]'
+              }`}
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-mono text-base font-bold text-white tracking-wide">
-                GATE CONTROL TERMINAL · {guardHostel}
+              <h1 className="font-mono text-sm font-bold text-zinc-100 uppercase tracking-tight">
+                GATE CONTROL STATION · {guardHostel}
               </h1>
-              <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${shiftActive ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-600' : 'bg-red-900/60 text-red-300 border border-red-600'}`}>
-                {shiftActive ? 'ON ACTIVE DUTY' : 'SHIFT OFF'}
+              <span
+                className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${
+                  shiftActive
+                    ? 'text-status-green bg-status-greenBg border-status-greenBorder'
+                    : 'text-status-red bg-status-redBg border-status-redBorder'
+                }`}
+              >
+                {shiftActive ? 'DUTY ACTIVE' : 'LOCKED / OFF DUTY'}
               </span>
             </div>
-            <div className="text-xs text-slate-400 mt-0.5">
-              Guard Officer: <span className="text-slate-200 font-medium">{user?.name}</span> ({guardId})
+            <div className="text-2xs font-mono text-zinc-400 mt-0.5">
+              OFFICER: <span className="text-zinc-200">{user?.name}</span> ({guardId})
               {attendanceRecord?.checkInTime && shiftActive && (
-                <span className="ml-2 font-mono text-slate-500">
-                  (Clocked in: {new Date(attendanceRecord.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                <span className="text-zinc-500 ml-2">
+                  CLOCK-IN: {new Date(attendanceRecord.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Shift Attendance Toggle (BR-011) */}
-        <div>
+        <div className="flex items-center gap-3 self-end md:self-center">
           <button
             onClick={handleToggleShift}
             disabled={shiftLoading}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wider uppercase transition flex items-center gap-2 shadow ${
+            className={`px-3.5 py-1.5 text-xs font-mono font-semibold rounded transition-colors inline-flex items-center gap-1.5 ${
               shiftActive
-                ? 'bg-slate-850 hover:bg-red-950/80 text-red-400 border border-slate-700 hover:border-red-700'
-                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/40'
+                ? 'bg-[#252529] hover:bg-status-red/20 text-zinc-300 hover:text-status-red border border-white/[0.08]'
+                : 'bg-status-green hover:bg-green-600 text-black font-bold'
             }`}
           >
             {shiftLoading ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             ) : shiftActive ? (
               <>
-                <LogOut className="w-4 h-4" />
-                <span>Clock Out Shift</span>
+                <LogOut className="w-3.5 h-3.5" />
+                <span>END SHIFT</span>
               </>
             ) : (
               <>
-                <LogIn className="w-4 h-4" />
-                <span>Clock In for Gate Duty</span>
+                <LogIn className="w-3.5 h-3.5" />
+                <span>CLOCK IN SHIFT</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Duty Off Warning Banner */}
-      {!shiftActive && (
-        <div className="mb-6 p-4 rounded-xl bg-amber-950/60 border border-amber-800/80 text-amber-300 text-xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-5 h-5 shrink-0 text-amber-400" />
-            <span>
-              <strong>BR-011 Guard Active Shift Requirement:</strong> You must clock in for duty before gate check-ins or check-outs can be authorized.
-            </span>
+      {/* Action Notification Strip */}
+      {gateActionStatus.message && (
+        <div
+          className={`p-3 rounded border text-xs font-mono flex items-center justify-between gap-2 animate-fade-in ${
+            gateActionStatus.type === 'error'
+              ? 'bg-status-redBg border-status-redBorder text-status-red'
+              : gateActionStatus.type === 'warning'
+              ? 'bg-status-amberBg border-status-amberBorder text-status-amber'
+              : 'bg-status-greenBg border-status-greenBorder text-status-green'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{gateActionStatus.message}</span>
           </div>
           <button
-            onClick={handleToggleShift}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-semibold shrink-0"
+            onClick={() => setGateActionStatus({ type: '', message: '' })}
+            className="text-zinc-400 hover:text-zinc-200"
           >
-            Clock In Now
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* Action Notification Message */}
-      {gateActionStatus.message && (
-        <div
-          className={`mb-6 p-4 rounded-xl text-xs font-medium flex items-center gap-2.5 animate-fadeIn ${
-            gateActionStatus.type === 'success'
-              ? 'bg-emerald-950/80 border border-emerald-800 text-emerald-300'
-              : gateActionStatus.type === 'warning'
-              ? 'bg-red-950/90 border border-red-700 text-red-200'
-              : 'bg-red-950/80 border border-red-800 text-red-300'
-          }`}
-        >
-          {gateActionStatus.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-          ) : (
-            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
-          )}
-          <span>{gateActionStatus.message}</span>
-        </div>
-      )}
-
-      {/* Operational Grid: Scanner/Verification & Active Visitors */}
+      {/* Main 3-Column Console Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Rapid Scan & Search Deck (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Scan & Lookup Card */}
-          <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl p-5 shadow-xl">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300 mb-4 flex items-center gap-2">
-              <Camera className="w-4 h-4 text-blue-400" />
-              <span>Visitor Gate Clearance</span>
-            </h2>
 
-            {/* Big Action: Open Camera Scanner */}
+        {/* Column 1: Optical Scan & Lookup Controls (4 cols) */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+              <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+                VERIFICATION TRIGGER
+              </span>
+              <span className="text-2xs font-mono text-zinc-600">FR-029</span>
+            </div>
+
+            {/* Big Optical Scanner Button */}
             <button
               onClick={() => setIsScannerOpen(true)}
               disabled={!shiftActive}
-              className="w-full py-4 mb-4 rounded-xl bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-semibold text-sm tracking-wide shadow-lg shadow-blue-900/40 flex items-center justify-center gap-3 transition disabled:opacity-40 disabled:cursor-not-allowed group"
+              className="w-full py-4 bg-accent hover:bg-accent-hover text-white rounded-md font-mono font-semibold text-xs flex flex-col items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:hover:bg-accent shadow-lg shadow-accent/10"
             >
-              <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span>Open Gate QR Camera Scanner</span>
+              <div className="p-2 rounded bg-white/10">
+                <Camera className="w-6 h-6" />
+              </div>
+              <span className="tracking-wider uppercase">LAUNCH OPTICAL QR SCANNER</span>
+              <span className="text-[10px] text-white/70 font-normal">Fast-Path Gate Lens</span>
             </button>
 
-            {/* Manual Quick Search */}
+            {/* Manual Lookup Form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleVerifyPass();
               }}
-              className="space-y-2"
+              className="pt-2 space-y-3"
             >
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                Manual Visitor Search (Phone / Roll No / Pass ID)
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                    <Search className="w-4 h-4" />
-                  </div>
+              <div>
+                <label className="form-label">MANUAL LOOKUP (TOKEN / ROLL / VR ID)</label>
+                <div className="relative">
+                  <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
                   <input
                     type="text"
-                    placeholder="e.g. TKN-A45X9, 24UCS049, or 9829233445"
+                    disabled={!shiftActive}
+                    placeholder="e.g. TKN-A45X9 or VR2045"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                    className="form-input pl-9 font-mono text-xs disabled:opacity-40"
                   />
                 </div>
-                <button
-                  type="submit"
-                  disabled={verifying || !searchQuery.trim()}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg text-xs font-semibold tracking-wide transition disabled:opacity-40"
-                >
-                  {verifying ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Lookup'}
-                </button>
               </div>
+              <button
+                type="submit"
+                disabled={!shiftActive || verifying || !searchQuery.trim()}
+                className="w-full py-2 bg-[#252529] hover:bg-[#323238] text-zinc-200 text-xs font-mono font-semibold rounded border border-white/[0.08] flex items-center justify-center gap-2 transition-colors disabled:opacity-40"
+              >
+                {verifying ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>VERIFYING CRYPTO PASS...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>EXECUTE PASS LOOKUP</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
             </form>
+
+            {!shiftActive && (
+              <div className="p-2.5 rounded bg-status-amberBg border border-status-amberBorder text-status-amber text-2xs font-mono flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>Duty clock-in required before gate verification operations (BR-011).</span>
+              </div>
+            )}
           </div>
 
-          {/* Verification Result Card (When pass is looked up) */}
-          {verifiedPassData && verifiedPassData.visitRequest && (
-            <div className="bg-hg-slate-900 border border-blue-500/50 rounded-xl p-5 shadow-2xl animate-fadeIn">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div>
-                  <span className="text-[10px] font-mono text-slate-400">REQUEST ID: {verifiedPassData.visitRequest.requestId}</span>
-                  <h3 className="text-base font-bold text-white mt-0.5">
-                    {verifiedPassData.visitRequest.visitor.fullName}
-                  </h3>
-                </div>
-                <StatusBadge status={verifiedPassData.visitRequest.requestStatus} />
-              </div>
-
-              {/* Visitor Details */}
-              <div className="grid grid-cols-2 gap-3 py-3 text-xs border-b border-slate-800">
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Phone Number</span>
-                  <span className="font-mono text-slate-200">{verifiedPassData.visitRequest.visitor.phoneNumber}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Government ID</span>
-                  <span className="font-mono text-slate-200">
-                    {verifiedPassData.visitRequest.visitor.identificationType}: {verifiedPassData.visitRequest.visitor.identificationNumber}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Host Student Roll</span>
-                  <span className="font-mono text-blue-400 font-semibold">{verifiedPassData.visitRequest.hostStudentRollNumber}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Assigned Room</span>
-                  <span className="text-slate-200">{verifiedPassData.visitRequest.hostelId} · Room {verifiedPassData.visitRequest.roomNumber}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Total Persons</span>
-                  <span className="text-slate-200 font-semibold">{verifiedPassData.visitRequest.totalVisitorCount} Person(s)</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] uppercase font-mono">Purpose</span>
-                  <span className="text-slate-200 truncate">{verifiedPassData.visitRequest.purpose}</span>
-                </div>
-              </div>
-
-              {/* Accompanying Guests */}
-              {verifiedPassData.visitRequest.accompanyingGuests?.length > 0 && (
-                <div className="py-2.5 border-b border-slate-800">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase font-mono mb-1.5">
-                    Accompanying Guests ({verifiedPassData.visitRequest.accompanyingGuests.length})
-                  </div>
-                  <div className="space-y-1">
-                    {verifiedPassData.visitRequest.accompanyingGuests.map((g, idx) => (
-                      <div key={idx} className="text-xs text-slate-300 flex items-center justify-between bg-slate-950 px-2 py-1 rounded">
-                        <span>{g.name}</span>
-                        <span className="text-[11px] text-slate-500 font-mono">{g.identificationType || 'Guest'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Gate Actions */}
-              <div className="mt-4">
-                {verifiedPassData.isCurrentlyInside ? (
-                  <button
-                    onClick={() => handleCheckOut(verifiedPassData.existingVisit)}
-                    disabled={!shiftActive}
-                    className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center justify-center gap-2 shadow"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Confirm Visitor Gate Exit (Check-Out)</span>
-                  </button>
-                ) : verifiedPassData.hasAlreadyCompleted ? (
-                  <div className="p-3 bg-slate-950 rounded text-center text-xs text-slate-400 border border-slate-800">
-                    This visitor already checked out. Pass has been permanently consumed.
-                  </div>
-                ) : verifiedPassData.isValid ? (
-                  <button
-                    onClick={handleCheckIn}
-                    disabled={!shiftActive}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Confirm Physical ID & Authorize Check-In</span>
-                  </button>
-                ) : (
-                  <div className="p-3 bg-red-950/60 rounded text-center text-xs text-red-300 border border-red-800">
-                    {verifiedPassData.reason || 'Pass cannot be authorized.'}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Quick Gate Guidelines */}
+          <div className="bg-[#111115] border border-white/[0.06] rounded-lg p-4 space-y-2">
+            <span className="text-2xs font-mono uppercase tracking-wider text-zinc-500">
+              GATE PROTOCOL RULES
+            </span>
+            <ul className="text-2xs text-zinc-400 space-y-1.5 list-disc list-inside font-mono">
+              <li>Visiting Window: 08:00 - 19:00 IST (BR-005)</li>
+              <li>Single Entry: Pass invalidates after use (BR-008)</li>
+              <li>Host Quota: Max 5 concurrent guests (BR-001)</li>
+              <li>Inspect physical government ID at gate</li>
+            </ul>
+          </div>
         </div>
 
-        {/* Right Column: Active Inside Records & Service Staff Deck (7 cols) */}
-        <div className="lg:col-span-7">
-          <div className="bg-hg-slate-900 border border-hg-slate-800 rounded-xl overflow-hidden shadow-xl">
-            {/* Header with Tabs */}
-            <div className="p-4 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+        {/* Column 2: Clearance Dossier Card (4 cols) */}
+        <div className="lg:col-span-4">
+          <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col justify-between min-h-[420px]">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
+                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+                  CLEARANCE DOSSIER
+                </span>
+                {verifiedPassData && (
+                  <StatusBadge
+                    status={verifiedPassData.isValid ? 'CLEARED' : 'DENIED'}
+                  />
+                )}
+              </div>
+
+              {!verifiedPassData ? (
+                <div className="py-16 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-base border border-white/[0.08] flex items-center justify-center mx-auto text-zinc-600">
+                    <User className="w-6 h-6" />
+                  </div>
+                  <div className="text-xs font-mono text-zinc-400">WAITING FOR PASS SCAN</div>
+                  <p className="text-2xs text-zinc-600 max-w-xs mx-auto">
+                    Scan visitor QR code or enter pass token manually to inspect credentials and authorization.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4 animate-fade-in">
+                  
+                  {/* Visitor Profile Strip */}
+                  <div className="flex items-start gap-3 p-3 bg-base border border-white/[0.06] rounded">
+                    <div className="w-10 h-10 rounded bg-accent/15 border border-accent/30 text-accent font-mono font-bold text-sm flex items-center justify-center shrink-0">
+                      {verifiedPassData.visitRequest.visitor.fullName.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-bold text-zinc-100 truncate">
+                        {verifiedPassData.visitRequest.visitor.fullName}
+                      </div>
+                      <div className="text-2xs font-mono text-zinc-400">
+                        {verifiedPassData.visitRequest.visitor.phoneNumber}
+                      </div>
+                      <div className="text-2xs font-mono text-zinc-500 truncate mt-0.5">
+                        {verifiedPassData.visitRequest.visitor.identificationType}: {verifiedPassData.visitRequest.visitor.identificationNumber}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Key Clearance Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-2 text-2xs font-mono">
+                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                      <div className="text-zinc-500">REQUEST ID</div>
+                      <div className="text-zinc-200 font-bold mt-0.5">
+                        {verifiedPassData.visitRequest.requestId}
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                      <div className="text-zinc-500">HOSTEL DESTINATION</div>
+                      <div className="text-zinc-200 font-bold mt-0.5">
+                        {verifiedPassData.visitRequest.hostelId} · Room {verifiedPassData.visitRequest.roomNumber}
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                      <div className="text-zinc-500">HOST STUDENT</div>
+                      <div className="text-blue-400 font-bold mt-0.5">
+                        {verifiedPassData.visitRequest.hostStudentRollNumber}
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                      <div className="text-zinc-500">ACCOMPANYING GUESTS</div>
+                      <div className="text-zinc-200 font-bold mt-0.5">
+                        +{verifiedPassData.visitRequest.accompanyingGuests?.length || 0} (Total {verifiedPassData.visitRequest.totalVisitorCount})
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Accompanying Guests List if any */}
+                  {verifiedPassData.visitRequest.accompanyingGuests?.length > 0 && (
+                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                      <div className="text-2xs font-mono text-zinc-500 mb-1">GUEST LIST:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {verifiedPassData.visitRequest.accompanyingGuests.map((g, idx) => (
+                          <span
+                            key={idx}
+                            className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono text-2xs"
+                          >
+                            {g.fullName}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Schedule Window */}
+                  <div className="p-2.5 rounded bg-base border border-white/[0.05] text-2xs font-mono flex items-center justify-between">
+                    <span className="text-zinc-500">SCHEDULE WINDOW</span>
+                    <span className="text-zinc-300 font-bold">
+                      {new Date(verifiedPassData.visitRequest.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(verifiedPassData.visitRequest.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+
+                  {!verifiedPassData.isValid && (
+                    <div className="p-3 rounded bg-status-redBg border border-status-redBorder text-status-red text-2xs font-mono">
+                      DENIAL REASON: {verifiedPassData.reason}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Clearance Decision Buttons */}
+            {verifiedPassData && (
+              <div className="pt-4 border-t border-white/[0.06] mt-4 flex gap-2">
+                <button
+                  onClick={() => setVerifiedPassData(null)}
+                  className="flex-1 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                >
+                  DISMISS
+                </button>
+                <button
+                  onClick={handleCheckIn}
+                  disabled={!shiftActive || !verifiedPassData.isValid}
+                  className="flex-1 py-2 bg-status-green hover:bg-green-600 text-black text-xs font-mono font-bold rounded transition-colors disabled:opacity-40 disabled:hover:bg-status-green flex items-center justify-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>AUTHORIZE ENTRY</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Column 3: Real-Time Active Log (Visitors & Workers) (4 cols) */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('VISITORS')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1 rounded text-2xs font-mono font-semibold uppercase tracking-wider transition-colors ${
                     activeTab === 'VISITORS'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      ? 'bg-accent/15 text-accent border border-accent/30'
+                      : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  <Users className="w-3.5 h-3.5" />
-                  <span>Active Inside Visitors ({activeInsideVisitors.length})</span>
+                  Inside Visitors ({activeInsideVisitors.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('WORKERS')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1 rounded text-2xs font-mono font-semibold uppercase tracking-wider transition-colors ${
                     activeTab === 'WORKERS'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      ? 'bg-accent/15 text-accent border border-accent/30'
+                      : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  <Briefcase className="w-3.5 h-3.5" />
-                  <span>Hostel Workers ({workersList.length})</span>
+                  Staff ({workersList.filter(w => w.currentlyInside).length} Inside)
                 </button>
               </div>
 
@@ -493,68 +552,63 @@ export const GateConsole = () => {
                   loadActiveVisitors();
                   loadWorkers();
                 }}
-                className="p-1.5 text-slate-400 hover:text-white rounded-md transition"
-                title="Refresh logs"
+                className="text-zinc-500 hover:text-zinc-200 p-1"
+                title="Refresh log"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingActive ? 'animate-spin text-accent' : ''}`} />
               </button>
             </div>
 
-            {/* Tab 1: Active Inside Visitors */}
+            {/* Content: Active Visitors */}
             {activeTab === 'VISITORS' && (
-              <div className="divide-y divide-slate-800 max-h-[600px] overflow-y-auto">
-                {loadingActive ? (
-                  <div className="p-8 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                    <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
-                    <span>Loading active visitors...</span>
-                  </div>
-                ) : activeInsideVisitors.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <Users className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                    <div className="text-xs font-medium text-slate-400">No active visitors currently inside {guardHostel}.</div>
+              <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                {activeInsideVisitors.length === 0 ? (
+                  <div className="py-12 text-center text-2xs font-mono text-zinc-600">
+                    NO ACTIVE VISITORS INSIDE HOSTEL
                   </div>
                 ) : (
-                  activeInsideVisitors.map((visit) => {
-                    const isOverdue = visit.overstayStatus || new Date().getTime() > new Date(visit.expectedExitTime).getTime();
-
+                  activeInsideVisitors.map((rec) => {
+                    const isOverstay = rec.overstayStatus;
                     return (
                       <div
-                        key={visit.visitId}
-                        className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
-                          isOverdue ? 'bg-red-950/20 hover:bg-red-950/30' : 'hover:bg-slate-850/50'
+                        key={rec.visitId}
+                        className={`p-3 rounded border bg-base transition-colors ${
+                          isOverstay
+                            ? 'border-status-redBorder bg-status-redBg/30'
+                            : 'border-white/[0.06]'
                         }`}
                       >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-sm">{visit.visitorName}</span>
-                            <span className="text-[11px] font-mono text-slate-400">({visit.totalVisitorCount} Person)</span>
-                            {isOverdue && <StatusBadge status="OVERSTAY" />}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+                              <span>{rec.visitorName}</span>
+                              {rec.totalVisitorCount > 1 && (
+                                <span className="text-[10px] font-mono text-zinc-400">
+                                  ({rec.totalVisitorCount} ppl)
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-2xs font-mono text-zinc-400 mt-0.5">
+                              Host: <span className="text-blue-400">{rec.hostStudentRollNumber}</span>
+                            </div>
+                            <div className="text-[10px] font-mono text-zinc-500 mt-1 flex items-center gap-2">
+                              <span>In: {new Date(rec.actualEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              {isOverstay && (
+                                <span className="text-status-red font-bold uppercase animate-pulse-subtle">
+                                  OVERSTAY
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-xs text-slate-400 flex flex-wrap items-center gap-3">
-                            <span className="flex items-center gap-1">
-                              <Home className="w-3 h-3 text-slate-500" />
-                              <span>Host: <strong className="text-slate-300">{visit.hostStudentRollNumber}</strong></span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3 text-slate-500" />
-                              <span>{visit.visitorPhone}</span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-slate-500" />
-                              <span>Entry: {new Date(visit.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            </span>
-                          </div>
-                        </div>
 
-                        {/* Quick Check-Out button */}
-                        <button
-                          onClick={() => handleCheckOut(visit)}
-                          disabled={!shiftActive}
-                          className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-600 text-slate-200 hover:text-white border border-slate-700 hover:border-amber-500 text-xs font-semibold flex items-center justify-center gap-1.5 transition shrink-0 disabled:opacity-40"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          <span>Check Out</span>
-                        </button>
+                          <button
+                            onClick={() => handleCheckOut(rec)}
+                            disabled={!shiftActive}
+                            className="px-2.5 py-1.5 bg-[#252529] hover:bg-status-red hover:text-white text-zinc-300 text-2xs font-mono font-semibold rounded border border-white/[0.08] transition-colors shrink-0 disabled:opacity-40"
+                          >
+                            CHECK-OUT
+                          </button>
+                        </div>
                       </div>
                     );
                   })
@@ -562,55 +616,53 @@ export const GateConsole = () => {
               </div>
             )}
 
-            {/* Tab 2: Campus Maintenance & Daily Workers (FR-047, FR-048) */}
+            {/* Content: Service Workers */}
             {activeTab === 'WORKERS' && (
-              <div className="divide-y divide-slate-800 max-h-[600px] overflow-y-auto">
+              <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
                 {workersList.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-400">No staff registered for this hostel.</div>
+                  <div className="py-12 text-center text-2xs font-mono text-zinc-600">
+                    NO REGISTERED WORKERS
+                  </div>
                 ) : (
                   workersList.map((worker) => (
                     <div
                       key={worker.workerId}
-                      className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-850/50 transition"
+                      className="p-3 rounded border border-white/[0.06] bg-base flex items-center justify-between gap-2"
                     >
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-sm">{worker.name}</span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                            {worker.workerType}
-                          </span>
-                          <span className="text-xs text-slate-400">· {worker.department}</span>
+                        <div className="text-xs font-bold text-zinc-100">
+                          {worker.fullName}
                         </div>
-                        <div className="text-xs text-slate-400 mt-1 flex items-center gap-3">
-                          <span className="font-mono text-[11px] text-blue-400">{worker.workerId}</span>
-                          <span>Assigned: <strong>{worker.assignedHostelId}</strong></span>
-                          <span>Status: {worker.currentlyInside ? (
-                            <span className="text-emerald-400 font-semibold">Inside Hostel</span>
-                          ) : (
-                            <span className="text-slate-500">Outside</span>
-                          )}</span>
+                        <div className="text-2xs font-mono text-zinc-400">
+                          {worker.department} · {worker.workerType}
+                        </div>
+                        <div className="text-[10px] font-mono mt-0.5">
+                          <span
+                            className={
+                              worker.currentlyInside ? 'text-status-green' : 'text-zinc-600'
+                            }
+                          >
+                            {worker.currentlyInside ? 'INSIDE HOSTEL' : 'OUTSIDE'}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Log Entry / Exit */}
-                      <div className="flex items-center gap-2">
+                      <div>
                         {worker.currentlyInside ? (
                           <button
                             onClick={() => handleWorkerActivity(worker.workerId, 'EXIT')}
                             disabled={!shiftActive}
-                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-red-600 text-slate-200 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1 transition disabled:opacity-40"
+                            className="px-2.5 py-1.5 bg-[#252529] hover:bg-status-red hover:text-white text-zinc-300 text-2xs font-mono font-semibold rounded border border-white/[0.08] transition-colors disabled:opacity-40"
                           >
-                            <LogOut className="w-3.5 h-3.5" />
-                            <span>Log Exit</span>
+                            LOG EXIT
                           </button>
                         ) : (
                           <button
                             onClick={() => handleWorkerActivity(worker.workerId, 'ENTRY')}
                             disabled={!shiftActive}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1 transition shadow disabled:opacity-40"
+                            className="px-2.5 py-1.5 bg-status-green hover:bg-green-600 text-black text-2xs font-mono font-bold rounded transition-colors disabled:opacity-40"
                           >
-                            <LogIn className="w-3.5 h-3.5" />
-                            <span>Log Entry</span>
+                            LOG ENTRY
                           </button>
                         )}
                       </div>
@@ -619,11 +671,13 @@ export const GateConsole = () => {
                 )}
               </div>
             )}
+
           </div>
         </div>
+
       </div>
 
-      {/* QR Scanner Camera Modal */}
+      {/* Optical Scanner Modal */}
       <QRScannerModal
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
