@@ -1,0 +1,21 @@
+{
+  "name": "hostguard-lnmiit-cs314-t049",
+  "version": "1.0.0",
+  "description": "HostGuard - Visitor Entry Management System (LNMIIT CS314 Team T049)",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && npm start",
+    "seed": "cd backend && npm run seed",
+    "test": "cd backend && npm test",
+    "build": "cd frontend && npm run build",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": [
+    "visitor-management",
+    "hostel-security",
+    "lnmiit",
+    "mern"
+  ],
+  "author": "Team T049 (Malapati Charith, Atharva Sharma, Raghav Gupta, Rudraksh Tank)"
+}
