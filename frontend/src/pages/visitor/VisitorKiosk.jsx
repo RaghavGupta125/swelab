@@ -291,7 +291,7 @@ export const VisitorKiosk = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="form-label">GOVT IDENTIFICATION TYPE</label>
                     <select
@@ -314,6 +314,16 @@ export const VisitorKiosk = () => {
                       placeholder="e.g. XXXX-XXXX-1234"
                       value={formData.identificationNumber}
                       onChange={(e) => setFormData({ ...formData, identificationNumber: e.target.value })}
+                      className="form-input text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">VEHICLE NO. (OPTIONAL)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. RJ-14-EA-1234"
+                      value={formData.vehicleNumber || ''}
+                      onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })}
                       className="form-input text-xs font-mono"
                     />
                   </div>
