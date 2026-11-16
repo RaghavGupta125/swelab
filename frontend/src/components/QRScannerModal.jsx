@@ -94,19 +94,19 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs animate-fade-in">
+      <div className="w-full max-w-md card shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.07] bg-base">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 bg-base">
           <div className="flex items-center gap-2.5">
             <div className="w-2 h-2 rounded-full bg-accent animate-pulse-subtle" />
-            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-200">
+            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-800">
               Optical Pass Verification
             </span>
           </div>
           <button
             onClick={handleClose}
-            className="p-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05] transition-colors"
+            className="p-1 rounded text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -114,7 +114,7 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
 
         {/* Viewport */}
         <div className="p-5 flex flex-col items-center">
-          <div className="relative w-full aspect-square max-w-[280px] bg-black rounded border border-white/[0.08] overflow-hidden flex items-center justify-center">
+          <div className="relative w-full aspect-square max-w-[280px] bg-black rounded border border-zinc-200 overflow-hidden flex items-center justify-center">
             {/* Corner Crosshairs */}
             <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent z-10" />
             <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent z-10" />
@@ -125,8 +125,8 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
 
             {isStarting && (
               <div className="absolute inset-0 bg-base/90 flex flex-col items-center justify-center gap-2 z-20">
-                <RefreshCw className="w-5 h-5 text-accent animate-spin" />
-                <span className="font-mono text-2xs text-zinc-400">INITIALIZING OPTICAL SENSOR...</span>
+                <RefreshCw className="w-5 h-5 text-zinc-900 animate-spin" />
+                <span className="font-mono text-2xs text-zinc-600">INITIALIZING OPTICAL SENSOR...</span>
               </div>
             )}
           </div>
@@ -139,7 +139,7 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
           )}
 
           {/* Manual Fallback */}
-          <form onSubmit={handleManualSubmit} className="mt-5 w-full pt-4 border-t border-white/[0.07]">
+          <form onSubmit={handleManualSubmit} className="mt-5 w-full pt-4 border-t border-zinc-200">
             <label className="block text-2xs font-mono uppercase tracking-wider text-zinc-500 mb-1.5">
               Manual Token / Pass Reference Entry
             </label>
@@ -149,11 +149,11 @@ export const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                 placeholder="e.g. TKN-A45X9 or VR2045"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                className="flex-1 bg-base border border-white/[0.1] rounded px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-accent"
+                className="flex-1 bg-base border border-zinc-200 rounded px-3 py-2 text-xs font-mono text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
               />
               <button
                 type="submit"
-                className="px-3.5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded font-mono inline-flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs text-xs font-semibold rounded font-mono inline-flex items-center gap-1.5 transition-colors"
               >
                 <span>VERIFY</span>
                 <ArrowRight className="w-3.5 h-3.5" />

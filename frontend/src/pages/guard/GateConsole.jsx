@@ -215,7 +215,7 @@ export const GateConsole = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Security Terminal Ops Bar */}
-      <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="relative">
             <div
@@ -226,7 +226,7 @@ export const GateConsole = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-mono text-sm font-bold text-zinc-100 uppercase tracking-tight">
+              <h1 className="font-mono text-sm font-bold text-zinc-900 uppercase tracking-tight">
                 GATE CONTROL STATION · {guardHostel}
               </h1>
               <span
@@ -239,8 +239,8 @@ export const GateConsole = () => {
                 {shiftActive ? 'DUTY ACTIVE' : 'LOCKED / OFF DUTY'}
               </span>
             </div>
-            <div className="text-2xs font-mono text-zinc-400 mt-0.5">
-              OFFICER: <span className="text-zinc-200">{user?.name}</span> ({guardId})
+            <div className="text-2xs font-mono text-zinc-600 mt-0.5">
+              OFFICER: <span className="text-zinc-800">{user?.name}</span> ({guardId})
               {attendanceRecord?.checkInTime && shiftActive && (
                 <span className="text-zinc-500 ml-2">
                   CLOCK-IN: {new Date(attendanceRecord.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -256,7 +256,7 @@ export const GateConsole = () => {
             disabled={shiftLoading}
             className={`px-3.5 py-1.5 text-xs font-mono font-semibold rounded transition-colors inline-flex items-center gap-1.5 ${
               shiftActive
-                ? 'bg-[#252529] hover:bg-status-red/20 text-zinc-300 hover:text-status-red border border-white/[0.08]'
+                ? 'bg-zinc-100 text-zinc-800 hover:bg-status-red/20 text-zinc-700 hover:text-status-red border border-zinc-200'
                 : 'bg-status-green hover:bg-green-600 text-black font-bold'
             }`}
           >
@@ -294,7 +294,7 @@ export const GateConsole = () => {
           </div>
           <button
             onClick={() => setGateActionStatus({ type: '', message: '' })}
-            className="text-zinc-400 hover:text-zinc-200"
+            className="text-zinc-600 hover:text-zinc-800"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -306,9 +306,9 @@ export const GateConsole = () => {
 
         {/* Column 1: Optical Scan & Lookup Controls (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-              <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+          <div className="card p-5 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-200">
+              <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600">
                 VERIFICATION TRIGGER
               </span>
               <span className="text-2xs font-mono text-zinc-600">FR-029</span>
@@ -318,7 +318,7 @@ export const GateConsole = () => {
             <button
               onClick={() => setIsScannerOpen(true)}
               disabled={!shiftActive}
-              className="w-full py-4 bg-accent hover:bg-accent-hover text-white rounded-md font-mono font-semibold text-xs flex flex-col items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:hover:bg-accent shadow-lg shadow-accent/10"
+              className="w-full py-4 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs rounded-md font-mono font-semibold text-xs flex flex-col items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:hover:bg-accent shadow-lg shadow-accent/10"
             >
               <div className="p-2 rounded bg-white/10">
                 <Camera className="w-6 h-6" />
@@ -352,7 +352,7 @@ export const GateConsole = () => {
               <button
                 type="submit"
                 disabled={!shiftActive || verifying || !searchQuery.trim()}
-                className="w-full py-2 bg-[#252529] hover:bg-[#323238] text-zinc-200 text-xs font-mono font-semibold rounded border border-white/[0.08] flex items-center justify-center gap-2 transition-colors disabled:opacity-40"
+                className="w-full py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-800 text-xs font-mono font-semibold rounded border border-zinc-200 flex items-center justify-center gap-2 transition-colors disabled:opacity-40"
               >
                 {verifying ? (
                   <>
@@ -377,11 +377,11 @@ export const GateConsole = () => {
           </div>
 
           {/* Quick Gate Guidelines */}
-          <div className="bg-[#111115] border border-white/[0.06] rounded-lg p-4 space-y-2">
+          <div className="card p-4 space-y-2">
             <span className="text-2xs font-mono uppercase tracking-wider text-zinc-500">
               GATE PROTOCOL RULES
             </span>
-            <ul className="text-2xs text-zinc-400 space-y-1.5 list-disc list-inside font-mono">
+            <ul className="text-2xs text-zinc-600 space-y-1.5 list-disc list-inside font-mono">
               <li>Visiting Window: 08:00 - 19:00 IST (BR-005)</li>
               <li>Single Entry: Pass invalidates after use (BR-008)</li>
               <li>Host Quota: Max 5 concurrent guests (BR-001)</li>
@@ -392,10 +392,10 @@ export const GateConsole = () => {
 
         {/* Column 2: Clearance Dossier Card (4 cols) */}
         <div className="lg:col-span-4">
-          <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col justify-between min-h-[420px]">
+          <div className="card p-5 flex flex-col justify-between min-h-[420px]">
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
-                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200 mb-4">
+                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600">
                   CLEARANCE DOSSIER
                 </span>
                 {verifiedPassData && (
@@ -407,10 +407,10 @@ export const GateConsole = () => {
 
               {!verifiedPassData ? (
                 <div className="py-16 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-base border border-white/[0.08] flex items-center justify-center mx-auto text-zinc-600">
+                  <div className="w-12 h-12 rounded-full bg-base border border-zinc-200 flex items-center justify-center mx-auto text-zinc-600">
                     <User className="w-6 h-6" />
                   </div>
-                  <div className="text-xs font-mono text-zinc-400">WAITING FOR PASS SCAN</div>
+                  <div className="text-xs font-mono text-zinc-600">WAITING FOR PASS SCAN</div>
                   <p className="text-2xs text-zinc-600 max-w-xs mx-auto">
                     Scan visitor QR code or enter pass token manually to inspect credentials and authorization.
                   </p>
@@ -419,15 +419,15 @@ export const GateConsole = () => {
                 <div className="space-y-4 animate-fade-in">
                   
                   {/* Visitor Profile Strip */}
-                  <div className="flex items-start gap-3 p-3 bg-base border border-white/[0.06] rounded">
-                    <div className="w-10 h-10 rounded bg-accent/15 border border-accent/30 text-accent font-mono font-bold text-sm flex items-center justify-center shrink-0">
+                  <div className="flex items-start gap-3 p-3 bg-base border border-zinc-200 rounded">
+                    <div className="w-10 h-10 rounded bg-accent/15 border border-accent/30 text-zinc-900 font-mono font-bold text-sm flex items-center justify-center shrink-0">
                       {verifiedPassData.visitRequest.visitor.fullName.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-zinc-100 truncate">
+                      <div className="text-xs font-bold text-zinc-900 truncate">
                         {verifiedPassData.visitRequest.visitor.fullName}
                       </div>
-                      <div className="text-2xs font-mono text-zinc-400">
+                      <div className="text-2xs font-mono text-zinc-600">
                         {verifiedPassData.visitRequest.visitor.phoneNumber}
                       </div>
                       <div className="text-2xs font-mono text-zinc-500 truncate mt-0.5">
@@ -438,27 +438,27 @@ export const GateConsole = () => {
 
                   {/* Key Clearance Metrics Grid */}
                   <div className="grid grid-cols-2 gap-2 text-2xs font-mono">
-                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                    <div className="p-2.5 rounded bg-base border border-zinc-200">
                       <div className="text-zinc-500">REQUEST ID</div>
-                      <div className="text-zinc-200 font-bold mt-0.5">
+                      <div className="text-zinc-800 font-bold mt-0.5">
                         {verifiedPassData.visitRequest.requestId}
                       </div>
                     </div>
-                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                    <div className="p-2.5 rounded bg-base border border-zinc-200">
                       <div className="text-zinc-500">HOSTEL DESTINATION</div>
-                      <div className="text-zinc-200 font-bold mt-0.5">
+                      <div className="text-zinc-800 font-bold mt-0.5">
                         {verifiedPassData.visitRequest.hostelId} · Room {verifiedPassData.visitRequest.roomNumber}
                       </div>
                     </div>
-                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                    <div className="p-2.5 rounded bg-base border border-zinc-200">
                       <div className="text-zinc-500">HOST STUDENT</div>
-                      <div className="text-blue-400 font-bold mt-0.5">
+                      <div className="text-blue-600 font-bold mt-0.5">
                         {verifiedPassData.visitRequest.hostStudentRollNumber}
                       </div>
                     </div>
-                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                    <div className="p-2.5 rounded bg-base border border-zinc-200">
                       <div className="text-zinc-500">ACCOMPANYING GUESTS</div>
-                      <div className="text-zinc-200 font-bold mt-0.5">
+                      <div className="text-zinc-800 font-bold mt-0.5">
                         +{verifiedPassData.visitRequest.accompanyingGuests?.length || 0} (Total {verifiedPassData.visitRequest.totalVisitorCount})
                       </div>
                     </div>
@@ -466,13 +466,13 @@ export const GateConsole = () => {
 
                   {/* Accompanying Guests List if any */}
                   {verifiedPassData.visitRequest.accompanyingGuests?.length > 0 && (
-                    <div className="p-2.5 rounded bg-base border border-white/[0.05]">
+                    <div className="p-2.5 rounded bg-base border border-zinc-200">
                       <div className="text-2xs font-mono text-zinc-500 mb-1">GUEST LIST:</div>
                       <div className="flex flex-wrap gap-1">
                         {verifiedPassData.visitRequest.accompanyingGuests.map((g, idx) => (
                           <span
                             key={idx}
-                            className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono text-2xs"
+                            className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200 font-mono text-2xs"
                           >
                             {g.fullName}
                           </span>
@@ -482,9 +482,9 @@ export const GateConsole = () => {
                   )}
 
                   {/* Schedule Window */}
-                  <div className="p-2.5 rounded bg-base border border-white/[0.05] text-2xs font-mono flex items-center justify-between">
+                  <div className="p-2.5 rounded bg-base border border-zinc-200 text-2xs font-mono flex items-center justify-between">
                     <span className="text-zinc-500">SCHEDULE WINDOW</span>
-                    <span className="text-zinc-300 font-bold">
+                    <span className="text-zinc-700 font-bold">
                       {new Date(verifiedPassData.visitRequest.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(verifiedPassData.visitRequest.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -500,10 +500,10 @@ export const GateConsole = () => {
 
             {/* Clearance Decision Buttons */}
             {verifiedPassData && (
-              <div className="pt-4 border-t border-white/[0.06] mt-4 flex gap-2">
+              <div className="pt-4 border-t border-zinc-200 mt-4 flex gap-2">
                 <button
                   onClick={() => setVerifiedPassData(null)}
-                  className="flex-1 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                  className="flex-1 py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-700 text-xs font-mono font-semibold rounded border border-zinc-200 transition-colors"
                 >
                   DISMISS
                 </button>
@@ -522,15 +522,15 @@ export const GateConsole = () => {
 
         {/* Column 3: Real-Time Active Log (Visitors & Workers) (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+          <div className="card p-5">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-200 mb-3">
               <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('VISITORS')}
                   className={`px-2.5 py-1 rounded text-2xs font-mono font-semibold uppercase tracking-wider transition-colors ${
                     activeTab === 'VISITORS'
-                      ? 'bg-accent/15 text-accent border border-accent/30'
-                      : 'text-zinc-500 hover:text-zinc-300'
+                      ? 'bg-accent/15 text-zinc-900 border border-accent/30'
+                      : 'text-zinc-500 hover:text-zinc-700'
                   }`}
                 >
                   Inside Visitors ({activeInsideVisitors.length})
@@ -539,8 +539,8 @@ export const GateConsole = () => {
                   onClick={() => setActiveTab('WORKERS')}
                   className={`px-2.5 py-1 rounded text-2xs font-mono font-semibold uppercase tracking-wider transition-colors ${
                     activeTab === 'WORKERS'
-                      ? 'bg-accent/15 text-accent border border-accent/30'
-                      : 'text-zinc-500 hover:text-zinc-300'
+                      ? 'bg-accent/15 text-zinc-900 border border-accent/30'
+                      : 'text-zinc-500 hover:text-zinc-700'
                   }`}
                 >
                   Staff ({workersList.filter(w => w.currentlyInside).length} Inside)
@@ -552,10 +552,10 @@ export const GateConsole = () => {
                   loadActiveVisitors();
                   loadWorkers();
                 }}
-                className="text-zinc-500 hover:text-zinc-200 p-1"
+                className="text-zinc-500 hover:text-zinc-800 p-1"
                 title="Refresh log"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loadingActive ? 'animate-spin text-accent' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingActive ? 'animate-spin text-zinc-900' : ''}`} />
               </button>
             </div>
 
@@ -575,21 +575,21 @@ export const GateConsole = () => {
                         className={`p-3 rounded border bg-base transition-colors ${
                           isOverstay
                             ? 'border-status-redBorder bg-status-redBg/30'
-                            : 'border-white/[0.06]'
+                            : 'border-zinc-200'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+                            <div className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
                               <span>{rec.visitorName}</span>
                               {rec.totalVisitorCount > 1 && (
-                                <span className="text-[10px] font-mono text-zinc-400">
+                                <span className="text-[10px] font-mono text-zinc-600">
                                   ({rec.totalVisitorCount} ppl)
                                 </span>
                               )}
                             </div>
-                            <div className="text-2xs font-mono text-zinc-400 mt-0.5">
-                              Host: <span className="text-blue-400">{rec.hostStudentRollNumber}</span>
+                            <div className="text-2xs font-mono text-zinc-600 mt-0.5">
+                              Host: <span className="text-blue-600">{rec.hostStudentRollNumber}</span>
                             </div>
                             <div className="text-[10px] font-mono text-zinc-500 mt-1 flex items-center gap-2">
                               <span>In: {new Date(rec.actualEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -604,7 +604,7 @@ export const GateConsole = () => {
                           <button
                             onClick={() => handleCheckOut(rec)}
                             disabled={!shiftActive}
-                            className="px-2.5 py-1.5 bg-[#252529] hover:bg-status-red hover:text-white text-zinc-300 text-2xs font-mono font-semibold rounded border border-white/[0.08] transition-colors shrink-0 disabled:opacity-40"
+                            className="px-2.5 py-1.5 bg-zinc-100 text-zinc-800 hover:bg-status-red hover:text-white text-zinc-700 text-2xs font-mono font-semibold rounded border border-zinc-200 transition-colors shrink-0 disabled:opacity-40"
                           >
                             CHECK-OUT
                           </button>
@@ -627,13 +627,13 @@ export const GateConsole = () => {
                   workersList.map((worker) => (
                     <div
                       key={worker.workerId}
-                      className="p-3 rounded border border-white/[0.06] bg-base flex items-center justify-between gap-2"
+                      className="p-3 rounded border border-zinc-200 bg-base flex items-center justify-between gap-2"
                     >
                       <div>
-                        <div className="text-xs font-bold text-zinc-100">
+                        <div className="text-xs font-bold text-zinc-900">
                           {worker.fullName}
                         </div>
-                        <div className="text-2xs font-mono text-zinc-400">
+                        <div className="text-2xs font-mono text-zinc-600">
                           {worker.department} · {worker.workerType}
                         </div>
                         <div className="text-[10px] font-mono mt-0.5">
@@ -652,7 +652,7 @@ export const GateConsole = () => {
                           <button
                             onClick={() => handleWorkerActivity(worker.workerId, 'EXIT')}
                             disabled={!shiftActive}
-                            className="px-2.5 py-1.5 bg-[#252529] hover:bg-status-red hover:text-white text-zinc-300 text-2xs font-mono font-semibold rounded border border-white/[0.08] transition-colors disabled:opacity-40"
+                            className="px-2.5 py-1.5 bg-zinc-100 text-zinc-800 hover:bg-status-red hover:text-white text-zinc-700 text-2xs font-mono font-semibold rounded border border-zinc-200 transition-colors disabled:opacity-40"
                           >
                             LOG EXIT
                           </button>

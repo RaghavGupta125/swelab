@@ -44,7 +44,7 @@ const CountdownTimer = ({ createdAt }) => {
       className={`font-mono text-2xs px-2 py-0.5 rounded border inline-flex items-center gap-1 ${
         isUrgent
           ? 'bg-status-redBg text-status-red border-status-redBorder animate-pulse-subtle'
-          : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+          : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
       }`}
     >
       <Clock className="w-3 h-3" />
@@ -277,13 +277,13 @@ export const StudentPortal = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Student Host Status & Quota Bar */}
-      <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-mono text-base font-bold text-zinc-100 uppercase tracking-tight">
+            <h1 className="font-mono text-base font-bold text-zinc-900 uppercase tracking-tight">
               HOST STUDENT WORKSPACE
             </h1>
-            <span className="text-2xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+            <span className="text-2xs font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
               {rollNumber} · {hostelId} Room {roomNumber}
             </span>
           </div>
@@ -296,8 +296,8 @@ export const StudentPortal = () => {
         <div className="flex items-center gap-5">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-2xs font-mono">
-              <span className="text-zinc-400">ACTIVE QUOTA USAGE</span>
-              <span className="text-zinc-200 font-bold">{currentCount} / {maxQuota}</span>
+              <span className="text-zinc-600">ACTIVE QUOTA USAGE</span>
+              <span className="text-zinc-800 font-bold">{currentCount} / {maxQuota}</span>
             </div>
             <div className="flex items-center gap-1.5">
               {[...Array(maxQuota)].map((_, i) => (
@@ -305,8 +305,8 @@ export const StudentPortal = () => {
                   key={i}
                   className={`w-6 h-2 rounded-sm transition-colors ${
                     i < currentCount
-                      ? 'bg-accent shadow-[0_0_6px_#E8531D]'
-                      : 'bg-zinc-800 border border-white/[0.05]'
+                      ? 'bg-zinc-900'
+                      : 'bg-zinc-200'
                   }`}
                 />
               ))}
@@ -315,7 +315,7 @@ export const StudentPortal = () => {
 
           <button
             onClick={() => setIsPreRegisterOpen(true)}
-            className="px-3.5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors shrink-0"
+            className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>PRE-REGISTER GUEST</span>
@@ -338,7 +338,7 @@ export const StudentPortal = () => {
           </div>
           <button
             onClick={() => setActionMessage({ type: '', text: '' })}
-            className="text-zinc-400 hover:text-zinc-200"
+            className="text-zinc-600 hover:text-zinc-800"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -349,7 +349,7 @@ export const StudentPortal = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+            <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600">
               PENDING CLEARANCE REQUESTS
             </span>
             <span className="text-2xs font-mono px-2 py-0.5 rounded-full bg-status-amberBg text-status-amber border border-status-amberBorder font-bold">
@@ -358,15 +358,15 @@ export const StudentPortal = () => {
           </div>
           <button
             onClick={loadDashboard}
-            className="text-2xs font-mono text-zinc-500 hover:text-zinc-300 inline-flex items-center gap-1"
+            className="text-2xs font-mono text-zinc-500 hover:text-zinc-700 inline-flex items-center gap-1"
           >
-            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin text-accent' : ''}`} />
+            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin text-zinc-900' : ''}`} />
             <span>REFRESH</span>
           </button>
         </div>
 
         {dashboardData?.pendingRequests?.length === 0 ? (
-          <div className="bg-[#111115] border border-white/[0.06] rounded-lg p-8 text-center text-2xs font-mono text-zinc-600">
+          <div className="card p-8 text-center text-2xs font-mono text-zinc-600">
             NO PENDING REQUESTS AWAITING CLEARANCE
           </div>
         ) : (
@@ -374,51 +374,51 @@ export const StudentPortal = () => {
             {dashboardData?.pendingRequests?.map((req) => (
               <div
                 key={req.requestId}
-                className="bg-[#111115] border border-white/[0.08] hover:border-white/[0.15] rounded-lg p-5 flex flex-col justify-between space-y-4 transition-all"
+                className="bg-white shadow-xs border border-zinc-200 hover:border-zinc-300 rounded-lg p-5 flex flex-col justify-between space-y-4 transition-all"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 pb-3 border-b border-white/[0.06]">
+                  <div className="flex items-start justify-between gap-2 pb-3 border-b border-zinc-200">
                     <div>
                       <div className="text-2xs font-mono text-zinc-500">ID: {req.requestId}</div>
-                      <h3 className="text-sm font-bold text-zinc-100 mt-0.5">{req.visitor.fullName}</h3>
-                      <div className="text-2xs font-mono text-zinc-400">{req.visitor.phoneNumber}</div>
+                      <h3 className="text-sm font-bold text-zinc-900 mt-0.5">{req.visitor.fullName}</h3>
+                      <div className="text-2xs font-mono text-zinc-600">{req.visitor.phoneNumber}</div>
                     </div>
                     <CountdownTimer createdAt={req.createdAt} />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 mt-3 text-2xs font-mono">
-                    <div className="p-2 rounded bg-base border border-white/[0.04]">
+                    <div className="p-2 rounded bg-base border border-zinc-200">
                       <span className="text-zinc-500">PURPOSE</span>
-                      <div className="text-zinc-200 truncate mt-0.5">{req.purpose}</div>
+                      <div className="text-zinc-800 truncate mt-0.5">{req.purpose}</div>
                     </div>
-                    <div className="p-2 rounded bg-base border border-white/[0.04]">
+                    <div className="p-2 rounded bg-base border border-zinc-200">
                       <span className="text-zinc-500">SCHEDULE</span>
-                      <div className="text-zinc-200 truncate mt-0.5">
+                      <div className="text-zinc-800 truncate mt-0.5">
                         {new Date(req.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(req.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
                   </div>
 
                   {req.accompanyingGuests?.length > 0 && (
-                    <div className="mt-2 p-2 rounded bg-base border border-white/[0.04] text-2xs font-mono">
+                    <div className="mt-2 p-2 rounded bg-base border border-zinc-200 text-2xs font-mono">
                       <span className="text-zinc-500">ACCOMPANYING GUESTS (+{req.accompanyingGuests.length}): </span>
-                      <span className="text-zinc-300">
+                      <span className="text-zinc-700">
                         {req.accompanyingGuests.map((g) => g.name).join(', ')}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-white/[0.06] flex items-center gap-2">
+                <div className="pt-3 border-t border-zinc-200 flex items-center gap-2">
                   <button
                     onClick={() => handleEditRequest(req)}
-                    className="flex-1 py-2 bg-base hover:bg-white/[0.06] text-blue-400 text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                    className="flex-1 py-2 bg-base hover:bg-zinc-100 text-blue-600 text-xs font-mono font-semibold rounded border border-zinc-200 transition-colors"
                   >
                     EDIT
                   </button>
                   <button
                     onClick={() => handleCancelRequest(req.requestId)}
-                    className="flex-1 py-2 bg-base hover:bg-status-redBg text-status-red text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                    className="flex-1 py-2 bg-base hover:bg-status-redBg text-status-red text-xs font-mono font-semibold rounded border border-zinc-200 transition-colors"
                   >
                     CANCEL
                   </button>
@@ -427,7 +427,7 @@ export const StudentPortal = () => {
                       setRejectModalReq(req);
                       setRejectionReason('');
                     }}
-                    className="flex-1 py-2 bg-[#252529] hover:bg-status-red hover:text-white text-zinc-300 text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                    className="flex-1 py-2 bg-zinc-100 text-zinc-800 hover:bg-status-red hover:text-white text-zinc-700 text-xs font-mono font-semibold rounded border border-zinc-200 transition-colors"
                   >
                     REJECT
                   </button>
@@ -448,14 +448,14 @@ export const StudentPortal = () => {
       {/* Active & Approved Passes */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
-          <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+          <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600">
             APPROVED PASSES & ACTIVE VISITORS
           </span>
           <span className="text-2xs font-mono text-zinc-600">SINGLE-ENTRY PASSES</span>
         </div>
 
         {dashboardData?.approvedRequests?.length === 0 ? (
-          <div className="bg-[#111115] border border-white/[0.06] rounded-lg p-6 text-center text-2xs font-mono text-zinc-600">
+          <div className="card p-6 text-center text-2xs font-mono text-zinc-600">
             NO ACTIVE OR APPROVED PASSES SCHEDULED
           </div>
         ) : (
@@ -463,15 +463,15 @@ export const StudentPortal = () => {
             {dashboardData?.approvedRequests?.map((req) => (
               <div
                 key={req.requestId}
-                className="bg-[#111115] border border-white/[0.08] rounded-lg p-4 flex flex-col justify-between space-y-3"
+                className="card p-4 flex flex-col justify-between space-y-3"
               >
                 <div>
                   <div className="flex items-start justify-between gap-1 mb-2">
                     <span className="text-2xs font-mono text-zinc-500">{req.requestId}</span>
                     <StatusBadge status={req.requestStatus} />
                   </div>
-                  <div className="text-xs font-bold text-zinc-100">{req.visitor.fullName}</div>
-                  <div className="text-2xs font-mono text-zinc-400 mt-0.5">
+                  <div className="text-xs font-bold text-zinc-900">{req.visitor.fullName}</div>
+                  <div className="text-2xs font-mono text-zinc-600 mt-0.5">
                     {req.visitor.phoneNumber} · {req.totalVisitorCount} total visitor(s)
                   </div>
                   <div className="text-2xs font-mono text-zinc-500 mt-2">
@@ -481,7 +481,7 @@ export const StudentPortal = () => {
 
                 <Link
                   to={`/pass/${req.accessToken || req.requestId}`}
-                  className="py-1.5 rounded bg-base hover:bg-white/[0.05] border border-white/[0.07] text-2xs font-mono text-blue-400 hover:text-blue-300 flex items-center justify-center gap-1.5 transition-colors"
+                  className="py-1.5 rounded bg-base hover:bg-zinc-100 border border-zinc-200 text-2xs font-mono text-blue-600 hover:text-blue-300 flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <QrCode className="w-3.5 h-3.5" />
                   <span>VIEW DIGITAL QR PASS &rarr;</span>
@@ -495,7 +495,7 @@ export const StudentPortal = () => {
       {/* Historical Log */}
       <div className="space-y-3 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+          <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600">
             VISIT RECORD ARCHIVE
           </span>
 
@@ -507,8 +507,8 @@ export const StudentPortal = () => {
                 onClick={() => setHistoryFilter(st)}
                 className={`px-2.5 py-1 rounded text-2xs font-mono font-semibold uppercase tracking-wider transition-colors ${
                   historyFilter === st
-                    ? 'bg-accent/15 text-accent border border-accent/30'
-                    : 'text-zinc-500 hover:text-zinc-300 bg-base border border-white/[0.05]'
+                    ? 'bg-accent/15 text-zinc-900 border border-accent/30'
+                    : 'text-zinc-500 hover:text-zinc-700 bg-base border border-zinc-200'
                 }`}
               >
                 {st}
@@ -517,10 +517,10 @@ export const StudentPortal = () => {
           </div>
         </div>
 
-        <div className="bg-[#111115] border border-white/[0.08] rounded-lg overflow-x-auto">
+        <div className="card overflow-x-auto">
           <table className="w-full text-left text-2xs font-mono border-collapse">
             <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500 bg-base">
+              <tr className="border-b border-zinc-200 text-zinc-500 bg-base">
                 <th className="p-3">REQUEST ID</th>
                 <th className="p-3">VISITOR</th>
                 <th className="p-3">PURPOSE</th>
@@ -540,19 +540,19 @@ export const StudentPortal = () => {
               ) : (
                 filteredHistory.map((item) => (
                   <tr key={item.requestId} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="p-3 text-zinc-400 font-bold">{item.requestId}</td>
+                    <td className="p-3 text-zinc-600 font-bold">{item.requestId}</td>
                     <td className="p-3">
-                      <div className="text-zinc-200 font-medium">{item.visitor.fullName}</div>
+                      <div className="text-zinc-800 font-medium">{item.visitor.fullName}</div>
                       <div className="text-zinc-500 text-[10px]">{item.visitor.phoneNumber}</div>
                     </td>
-                    <td className="p-3 text-zinc-400 truncate max-w-[160px]">{item.purpose}</td>
-                    <td className="p-3 text-zinc-400">
+                    <td className="p-3 text-zinc-600 truncate max-w-[160px]">{item.purpose}</td>
+                    <td className="p-3 text-zinc-600">
                       <div>{item.visitDate ? new Date(item.visitDate).toLocaleDateString() : 'DATE NOT SET'}</div>
                       <div className="text-zinc-500 text-[10px]">
                         {item.expectedEntryTime ? new Date(item.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TIME NOT SET'}
                       </div>
                     </td>
-                    <td className="p-3 text-zinc-400">
+                    <td className="p-3 text-zinc-600">
                       {item.accompanyingGuests?.length > 0 ? `+${item.accompanyingGuests.length}` : '—'}
                     </td>
                     <td className="p-3">
@@ -560,7 +560,7 @@ export const StudentPortal = () => {
                     </td>
                     <td className="p-3">
                       <div className="flex gap-2">
-                        {['DRAFT', 'PENDING'].includes(item.requestStatus) && <button onClick={() => handleEditRequest(item)} className="text-blue-400 hover:text-blue-300">EDIT</button>}
+                        {['DRAFT', 'PENDING'].includes(item.requestStatus) && <button onClick={() => handleEditRequest(item)} className="text-blue-600 hover:text-blue-300">EDIT</button>}
                         {['DRAFT', 'PENDING', 'APPROVED'].includes(item.requestStatus) && <button onClick={() => handleCancelRequest(item.requestId)} className="text-status-red hover:text-red-300">CANCEL</button>}
                       </div>
                     </td>
@@ -574,15 +574,15 @@ export const StudentPortal = () => {
 
       {/* Pre-Registration Studio Modal */}
       {isPreRegisterOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-lg card shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 bg-base">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-800">
                 {editingRequestId ? `EDIT REQUEST ${editingRequestId}` : 'PRE-REGISTER VISITOR CLEARANCE'}
               </span>
               <button
                 onClick={() => setIsPreRegisterOpen(false)}
-                className="text-zinc-500 hover:text-zinc-200"
+                className="text-zinc-500 hover:text-zinc-800"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -698,11 +698,11 @@ export const StudentPortal = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-white/[0.06]">
+              <div className="flex justify-end gap-2 pt-4 border-t border-zinc-200">
                 <button
                   type="button"
                   onClick={() => { setIsPreRegisterOpen(false); setEditingRequestId(null); }}
-                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
+                  className="px-4 py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-700 rounded text-xs font-mono font-semibold"
                 >
                   CANCEL
                 </button>
@@ -710,14 +710,14 @@ export const StudentPortal = () => {
                   type="button"
                   onClick={handleSaveDraft}
                   disabled={preRegLoading}
-                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-200 rounded text-xs font-mono font-semibold disabled:opacity-50"
+                  className="px-4 py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-800 rounded text-xs font-mono font-semibold disabled:opacity-50"
                 >
                   {editingRequestId && dashboardData?.historicalRequests?.find((request) => request.requestId === editingRequestId)?.requestStatus !== 'DRAFT' ? 'SAVE CHANGES' : 'SAVE DRAFT'}
                 </button>
                 <button
                   type="submit"
                   disabled={preRegLoading}
-                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded text-xs font-mono font-semibold transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs rounded text-xs font-mono font-semibold transition-colors disabled:opacity-50"
                 >
                   {preRegLoading ? 'SAVING...' : editingRequestId ? 'SAVE REQUEST' : 'CREATE PRE-REGISTRATION'}
                 </button>
@@ -729,23 +729,23 @@ export const StudentPortal = () => {
 
       {/* Reject Reason Studio Modal */}
       {rejectModalReq && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md card shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 bg-base">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-800">
                 REJECT REQUEST {rejectModalReq.requestId}
               </span>
               <button
                 onClick={() => setRejectModalReq(null)}
-                className="text-zinc-500 hover:text-zinc-200"
+                className="text-zinc-500 hover:text-zinc-800"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleRejectConfirm} className="p-5 space-y-4">
-              <p className="text-2xs font-mono text-zinc-400">
-                Visitor: <strong className="text-zinc-200">{rejectModalReq.visitor.fullName}</strong>. Provide an optional reason for the rejection (BR-003).
+              <p className="text-2xs font-mono text-zinc-600">
+                Visitor: <strong className="text-zinc-800">{rejectModalReq.visitor.fullName}</strong>. Provide an optional reason for the rejection (BR-003).
               </p>
 
               <div>
@@ -759,11 +759,11 @@ export const StudentPortal = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setRejectModalReq(null)}
-                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
+                  className="px-4 py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-700 rounded text-xs font-mono font-semibold"
                 >
                   ABORT
                 </button>

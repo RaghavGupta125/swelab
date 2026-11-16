@@ -14,35 +14,35 @@
   }
 
   body {
-    background-color: #F4F7FB;
-    color: #1E293B;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #FAFAFA;
+    color: #09090B;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     line-height: 1.5;
   }
 
-  /* Consistent focus ring in LNMIIT Blue */
+  /* Refined Focus Ring (Modern Vercel / GitHub) */
   :focus-visible {
-    outline: 2px solid #0067A5;
+    outline: 2px solid #18181B;
     outline-offset: 2px;
   }
 
-  /* Clean Academic Scrollbar */
+  /* Minimalist Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #F1F5F9;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #CBD5E1;
-    border-radius: 3px;
+    background: #D4D4D8;
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #94A3B8;
+    background: #A1A1AA;
   }
 
-  /* Monospace for IDs, codes, timestamps */
+  /* Monospace for IDs, tokens, timestamps */
   .font-mono {
     font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
     font-feature-settings: 'liga' 0;
@@ -50,63 +50,63 @@
 }
 
 @layer components {
-  /* Institutional Card Surface */
+  /* Minimalist Clean White Card */
   .card {
-    @apply bg-white border border-slate-200/80 rounded shadow-erp;
+    @apply bg-white border border-zinc-200/90 rounded-xl shadow-xs;
   }
 
-  /* Section header */
+  /* Clean Section Header Label */
   .section-label {
-    @apply text-2xs font-mono uppercase tracking-[0.08em] text-slate-500 font-semibold;
+    @apply text-2xs font-mono uppercase tracking-wider text-zinc-500 font-semibold;
   }
 
-  /* Primary Action Button (LNMIIT Blue) */
+  /* High-Contrast Primary Button (Vercel/Linear style) */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-lnmiit-blue hover:bg-lnmiit-blue-dark text-white text-xs font-semibold rounded shadow-sm transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-lg shadow-xs transition-all active:scale-[0.98];
   }
 
-  /* Secondary Button */
+  /* Secondary Border Button */
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded border border-slate-300 shadow-sm transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-medium rounded-lg border border-zinc-200 shadow-xs transition-colors;
   }
 
   /* Ghost Button */
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-3 py-1.5 text-slate-600 hover:text-lnmiit-blue hover:bg-slate-100 text-xs font-medium rounded transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 text-xs font-medium rounded-lg transition-colors;
   }
 
   /* Danger Button */
   .btn-danger {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-status-redBg hover:bg-red-100 text-status-red text-xs font-semibold rounded border border-status-redBorder transition-colors;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-medium rounded-lg border border-red-200 transition-colors;
   }
 
-  /* ERP Form Input */
+  /* Modern Form Input */
   .form-input {
-    @apply w-full bg-white border border-slate-300 rounded px-3 py-2 text-sm text-slate-800 placeholder-slate-400
-    focus:outline-none focus:border-lnmiit-blue focus:ring-1 focus:ring-lnmiit-blue shadow-sm transition-colors;
+    @apply w-full bg-white border border-zinc-300 rounded-lg px-3.5 py-2 text-sm text-zinc-900 placeholder-zinc-400
+    focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 shadow-xs transition-colors;
   }
 
-  /* Form Label */
+  /* Clean Form Label */
   .form-label {
-    @apply block text-2xs font-semibold uppercase tracking-wider text-slate-600 mb-1;
+    @apply block text-xs font-medium text-zinc-700 mb-1.5;
   }
 
   /* Data Row */
   .data-row {
-    @apply flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0;
+    @apply flex items-center justify-between py-2.5 border-b border-zinc-100 last:border-0;
   }
 
   /* Stat Number */
   .stat-num {
-    @apply text-2xl font-mono font-bold text-slate-900;
+    @apply text-2xl font-mono font-bold text-zinc-900 tracking-tight;
   }
 
-  /* Sidebar Nav Item */
+  /* Navigation Item */
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium text-slate-600 hover:text-lnmiit-blue hover:bg-lnmiit-blue-light transition-colors cursor-pointer;
+    @apply flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer;
   }
   .nav-item.active {
-    @apply bg-lnmiit-blue-light text-lnmiit-blue font-semibold border-l-4 border-lnmiit-blue pl-2.5;
+    @apply bg-zinc-100 text-zinc-900 font-semibold;
   }
 }
 

@@ -41,7 +41,7 @@ export const DigitalPassView = () => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <RefreshCw className="w-6 h-6 animate-spin text-accent" />
+        <RefreshCw className="w-6 h-6 animate-spin text-zinc-900" />
         <span className="font-mono text-2xs text-zinc-500 uppercase tracking-wider">
           RETRIEVING CRYPTOGRAPHIC PASS...
         </span>
@@ -53,12 +53,12 @@ export const DigitalPassView = () => {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center space-y-3">
         <AlertCircle className="w-10 h-10 text-status-red mx-auto" />
-        <h2 className="text-sm font-mono font-bold text-zinc-100 uppercase">PASS UNAVAILABLE</h2>
-        <p className="text-2xs font-mono text-zinc-400">{error || 'Could not retrieve pass record.'}</p>
+        <h2 className="text-sm font-mono font-bold text-zinc-900 uppercase">PASS UNAVAILABLE</h2>
+        <p className="text-2xs font-mono text-zinc-600">{error || 'Could not retrieve pass record.'}</p>
         <div className="pt-2">
           <Link
             to="/visitor"
-            className="text-2xs font-mono text-accent hover:underline inline-flex items-center gap-1"
+            className="text-2xs font-mono text-zinc-900 hover:underline inline-flex items-center gap-1"
           >
             <ArrowLeft className="w-3 h-3" />
             <span>RETURN TO VISITOR KIOSK</span>
@@ -73,7 +73,7 @@ export const DigitalPassView = () => {
       <div>
         <Link
           to="/visitor"
-          className="inline-flex items-center gap-1.5 text-2xs font-mono text-zinc-400 hover:text-zinc-200 transition-colors"
+          className="inline-flex items-center gap-1.5 text-2xs font-mono text-zinc-600 hover:text-zinc-800 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>BACK TO VISITOR KIOSK</span>
@@ -81,14 +81,14 @@ export const DigitalPassView = () => {
       </div>
 
       {/* High-Assurance Digital Pass Card */}
-      <div className="bg-[#111115] border border-white/[0.1] rounded-lg overflow-hidden shadow-2xl relative">
+      <div className="card overflow-hidden shadow-2xl relative">
         
         {/* Pass Top Bar */}
-        <div className="bg-base px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
+        <div className="bg-base px-5 py-3.5 border-b border-zinc-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-accent" />
+            <Shield className="w-4 h-4 text-zinc-900" />
             <div>
-              <div className="font-mono text-xs font-bold text-zinc-100 tracking-wider">
+              <div className="font-mono text-xs font-bold text-zinc-900 tracking-wider">
                 HOSTGUARD PASS
               </div>
               <div className="text-[9px] font-mono text-zinc-500">LNMIIT GATE CLEARANCE</div>
@@ -98,13 +98,13 @@ export const DigitalPassView = () => {
         </div>
 
         {/* QR Core Container */}
-        <div className="p-6 bg-black flex flex-col items-center justify-center border-b border-white/[0.08] relative">
+        <div className="p-6 bg-zinc-50 flex flex-col items-center justify-center border-b border-zinc-200 relative">
           
           {/* Subtle Security Crosshairs */}
-          <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-zinc-700" />
-          <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-zinc-700" />
-          <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-zinc-700" />
-          <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-zinc-700" />
+          <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-zinc-300" />
+          <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-zinc-300" />
+          <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-zinc-300" />
+          <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-zinc-300" />
 
           {request.requestStatus === 'APPROVED' && qrPass?.qrCodeDataUrl ? (
             <div className="flex flex-col items-center space-y-3">
@@ -116,7 +116,7 @@ export const DigitalPassView = () => {
                 />
               </div>
               <div className="text-center">
-                <span className="font-mono text-xs font-bold text-accent tracking-widest block">
+                <span className="font-mono text-xs font-bold text-zinc-900 tracking-widest block">
                   {qrPass.token}
                 </span>
                 <span className="text-[10px] font-mono text-zinc-500">
@@ -127,10 +127,10 @@ export const DigitalPassView = () => {
           ) : request.requestStatus === 'PENDING' ? (
             <div className="p-8 text-center space-y-3">
               <Clock className="w-10 h-10 text-status-amber mx-auto animate-pulse-subtle" />
-              <div className="text-xs font-mono font-bold text-zinc-100 uppercase">
+              <div className="text-xs font-mono font-bold text-zinc-900 uppercase">
                 AWAITING HOST CLEARANCE
               </div>
-              <p className="text-2xs font-mono text-zinc-400 max-w-xs">
+              <p className="text-2xs font-mono text-zinc-600 max-w-xs">
                 Host student ({request.hostStudentRollNumber}) must approve this request before gate pass activates.
               </p>
             </div>
@@ -143,40 +143,40 @@ export const DigitalPassView = () => {
 
         {/* Pass Key-Value Dossier */}
         <div className="p-5 space-y-2.5 text-2xs font-mono">
-          <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
+          <div className="flex justify-between items-center pb-2 border-b border-zinc-200">
             <span className="text-zinc-500 uppercase">PRIMARY VISITOR</span>
-            <span className="text-zinc-100 font-bold">
+            <span className="text-zinc-900 font-bold">
               {request.visitor.fullName} ({request.totalVisitorCount} Ppl)
             </span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
+          <div className="flex justify-between items-center pb-2 border-b border-zinc-200">
             <span className="text-zinc-500 uppercase">GOVT ID RECORD</span>
-            <span className="text-zinc-300">
+            <span className="text-zinc-700">
               {request.visitor.identificationType}: {request.visitor.identificationNumber}
             </span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
+          <div className="flex justify-between items-center pb-2 border-b border-zinc-200">
             <span className="text-zinc-500 uppercase">HOST STUDENT</span>
-            <span className="text-blue-400 font-bold">{request.hostStudentRollNumber}</span>
+            <span className="text-blue-600 font-bold">{request.hostStudentRollNumber}</span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
+          <div className="flex justify-between items-center pb-2 border-b border-zinc-200">
             <span className="text-zinc-500 uppercase">DESTINATION</span>
-            <span className="text-zinc-200">{request.hostelId} · Room {request.roomNumber}</span>
+            <span className="text-zinc-800">{request.hostelId} · Room {request.roomNumber}</span>
           </div>
 
-          <div className="flex justify-between items-center pb-2 border-b border-white/[0.05]">
+          <div className="flex justify-between items-center pb-2 border-b border-zinc-200">
             <span className="text-zinc-500 uppercase">SCHEDULE WINDOW</span>
-            <span className="text-zinc-200">
+            <span className="text-zinc-800">
               {new Date(request.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(request.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
 
           {/* Security Notice */}
-          <div className="p-3 rounded bg-base border border-white/[0.06] text-zinc-400 text-2xs flex items-start gap-2 mt-3">
-            <Info className="w-4 h-4 shrink-0 mt-0.5 text-accent" />
+          <div className="p-3 rounded bg-base border border-zinc-200 text-zinc-600 text-2xs flex items-start gap-2 mt-3">
+            <Info className="w-4 h-4 shrink-0 mt-0.5 text-zinc-900" />
             <span>
               <strong>Gate Security Protocol:</strong> Present physical Government ID matching registered credentials to the guard upon entry.
             </span>

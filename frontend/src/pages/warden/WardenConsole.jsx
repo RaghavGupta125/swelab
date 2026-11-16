@@ -221,13 +221,13 @@ export const WardenConsole = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Top Banner / Hostel Selector */}
-      <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-mono text-base font-bold text-zinc-100 uppercase tracking-tight">
+            <h1 className="font-mono text-base font-bold text-zinc-900 uppercase tracking-tight">
               HOSTEL WARDEN OPERATIONS CENTER
             </h1>
-            <span className="text-2xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+            <span className="text-2xs font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
               {selectedHostel} SECTOR
             </span>
           </div>
@@ -238,11 +238,11 @@ export const WardenConsole = () => {
 
         {/* Hostel Selector */}
         <div className="flex items-center gap-3">
-          <label className="text-2xs font-mono text-zinc-400 uppercase">ZONE SECTOR:</label>
+          <label className="text-2xs font-mono text-zinc-600 uppercase">ZONE SECTOR:</label>
           <select
             value={selectedHostel}
             onChange={(e) => setSelectedHostel(e.target.value)}
-            className="bg-base border border-white/[0.1] rounded px-3 py-1.5 text-xs font-mono text-zinc-200 focus:outline-none focus:border-accent"
+            className="bg-base border border-zinc-200 rounded px-3 py-1.5 text-xs font-mono text-zinc-800 focus:outline-none focus:border-accent"
           >
             <option value="BH1">BH1 (Boys Hostel 1)</option>
             <option value="BH2">BH2 (Boys Hostel 2)</option>
@@ -251,9 +251,9 @@ export const WardenConsole = () => {
           </select>
           <button
             onClick={loadWardenDashboard}
-            className="p-1.5 rounded bg-base hover:bg-white/[0.05] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="p-1.5 rounded bg-base hover:bg-zinc-100 border border-zinc-200 text-zinc-600 hover:text-zinc-800 transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-accent' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-zinc-900' : ''}`} />
           </button>
         </div>
       </div>
@@ -281,8 +281,8 @@ export const WardenConsole = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded text-xs font-mono font-medium transition-colors text-left ${
                   active
-                    ? 'bg-accent/15 text-accent border border-accent/30 font-semibold'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
+                    ? 'bg-accent/15 text-zinc-900 border border-accent/30 font-semibold'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-white/[0.04]'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -304,19 +304,19 @@ export const WardenConsole = () => {
               
               {/* 2x2 Metric Cards Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                <div className="p-4 card">
                   <div className="text-2xs font-mono text-zinc-500 uppercase">ACTIVE INSIDE</div>
-                  <div className="text-2xl font-mono font-bold text-zinc-100 mt-1">
+                  <div className="text-2xl font-mono font-bold text-zinc-900 mt-1">
                     {dashboardData?.occupancy?.currentlyInsideVisitors || 0}
                   </div>
                   <div className="text-[10px] font-mono text-zinc-500 mt-1">PEOPLE AT GATE</div>
                 </div>
 
-                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                <div className="p-4 card">
                   <div className="text-2xs font-mono text-zinc-500 uppercase">OVERSTAY INCIDENTS</div>
                   <div
                     className={`text-2xl font-mono font-bold mt-1 ${
-                      overstayAlerts.length > 0 ? 'text-status-red' : 'text-zinc-100'
+                      overstayAlerts.length > 0 ? 'text-status-red' : 'text-zinc-900'
                     }`}
                   >
                     {overstayAlerts.length}
@@ -324,7 +324,7 @@ export const WardenConsole = () => {
                   <div className="text-[10px] font-mono text-zinc-500 mt-1">PAST EXIT WINDOW</div>
                 </div>
 
-                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                <div className="p-4 card">
                   <div className="text-2xs font-mono text-zinc-500 uppercase">ON-DUTY GUARDS</div>
                   <div className="text-2xl font-mono font-bold text-status-green mt-1">
                     {dashboardData?.activeGuards?.length || 0}
@@ -332,9 +332,9 @@ export const WardenConsole = () => {
                   <div className="text-[10px] font-mono text-zinc-500 mt-1">ACTIVE SHIFTS</div>
                 </div>
 
-                <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                <div className="p-4 card">
                   <div className="text-2xs font-mono text-zinc-500 uppercase">TODAY'S ADMISSIONS</div>
-                  <div className="text-2xl font-mono font-bold text-zinc-100 mt-1">
+                  <div className="text-2xl font-mono font-bold text-zinc-900 mt-1">
                     {dashboardData?.occupancy?.totalTodayVisits || 0}
                   </div>
                   <div className="text-[10px] font-mono text-zinc-500 mt-1">COMPLETED ENTRIES</div>
@@ -343,7 +343,7 @@ export const WardenConsole = () => {
 
               {/* Overstay Alert Queue */}
               {overstayAlerts.length > 0 && (
-                <div className="bg-[#111115] border border-status-redBorder rounded-lg p-5 space-y-3">
+                <div className="bg-white shadow-xs border border-status-redBorder rounded-lg p-5 space-y-3">
                   <div className="flex items-center justify-between pb-3 border-b border-status-redBorder/40">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-status-red animate-pulse-subtle" />
@@ -357,7 +357,7 @@ export const WardenConsole = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-2xs font-mono">
                       <thead>
-                        <tr className="border-b border-white/[0.06] text-zinc-500">
+                        <tr className="border-b border-zinc-200 text-zinc-500">
                           <th className="p-2.5">ALERT ID</th>
                           <th className="p-2.5">VISITOR NAME</th>
                           <th className="p-2.5">HOST ROLL</th>
@@ -370,9 +370,9 @@ export const WardenConsole = () => {
                         {overstayAlerts.map((alt) => (
                           <tr key={alt.alertId} className="hover:bg-white/[0.02]">
                             <td className="p-2.5 text-status-red font-bold">{alt.alertId}</td>
-                            <td className="p-2.5 text-zinc-200 font-semibold">{alt.visitorName}</td>
-                            <td className="p-2.5 text-blue-400">{alt.hostStudentRollNumber}</td>
-                            <td className="p-2.5 text-zinc-400">
+                            <td className="p-2.5 text-zinc-800 font-semibold">{alt.visitorName}</td>
+                            <td className="p-2.5 text-blue-600">{alt.hostStudentRollNumber}</td>
+                            <td className="p-2.5 text-zinc-600">
                               {new Date(alt.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </td>
                             <td className="p-2.5">
@@ -400,9 +400,9 @@ export const WardenConsole = () => {
               )}
 
               {/* Active Inside Visitors Table */}
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-3">
-                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400">
+              <div className="card p-5 space-y-3">
+                <div className="flex items-center justify-between pb-3 border-b border-zinc-200">
+                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600">
                     VISITORS PRESENTLY OCCUPYING {selectedHostel}
                   </span>
                   <span className="text-2xs font-mono text-zinc-600">FR-039</span>
@@ -411,7 +411,7 @@ export const WardenConsole = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-2xs font-mono">
                     <thead>
-                      <tr className="border-b border-white/[0.06] text-zinc-500">
+                      <tr className="border-b border-zinc-200 text-zinc-500">
                         <th className="p-2.5">VISIT ID</th>
                         <th className="p-2.5">VISITOR</th>
                         <th className="p-2.5">HOST ROLL</th>
@@ -430,16 +430,16 @@ export const WardenConsole = () => {
                       ) : (
                         dashboardData.activeInsideVisitors.map((rec) => (
                           <tr key={rec.visitId} className="hover:bg-white/[0.02]">
-                            <td className="p-2.5 text-zinc-400">{rec.visitId}</td>
+                            <td className="p-2.5 text-zinc-600">{rec.visitId}</td>
                             <td className="p-2.5">
-                              <div className="text-zinc-200 font-semibold">{rec.visitorName}</div>
+                              <div className="text-zinc-800 font-semibold">{rec.visitorName}</div>
                               <div className="text-zinc-500 text-[10px]">{rec.visitorPhone}</div>
                             </td>
-                            <td className="p-2.5 text-blue-400">{rec.hostStudentRollNumber}</td>
-                            <td className="p-2.5 text-zinc-300">
+                            <td className="p-2.5 text-blue-600">{rec.hostStudentRollNumber}</td>
+                            <td className="p-2.5 text-zinc-700">
                               {new Date(rec.actualEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </td>
-                            <td className="p-2.5 text-zinc-300">
+                            <td className="p-2.5 text-zinc-700">
                               {new Date(rec.expectedExitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </td>
                             <td className="p-2.5">
@@ -459,8 +459,8 @@ export const WardenConsole = () => {
           {/* TAB 2: HISTORICAL VISITS */}
           {activeTab === 'HISTORY' && (
             <div className="space-y-4">
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5">
-                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block mb-3">
+              <div className="card p-5">
+                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600 block mb-3">
                   PARAMETRIC SEARCH ARCHIVE (FR-040)
                 </span>
 
@@ -495,12 +495,12 @@ export const WardenConsole = () => {
                     />
                   </div>
                   <div className="sm:col-span-2 flex items-center gap-2 pt-2">
-                    <label className="flex items-center gap-2 text-2xs font-mono text-zinc-300 cursor-pointer">
+                    <label className="flex items-center gap-2 text-2xs font-mono text-zinc-700 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={historyParams.overstayOnly}
                         onChange={(e) => setHistoryParams({ ...historyParams, overstayOnly: e.target.checked })}
-                        className="rounded border-white/20 bg-base text-accent"
+                        className="rounded border-zinc-200 bg-base text-zinc-900"
                       />
                       <span>OVERSTAY VIOLATIONS ONLY</span>
                     </label>
@@ -509,7 +509,7 @@ export const WardenConsole = () => {
                     <button
                       type="submit"
                       disabled={searchingHistory}
-                      className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-2 transition-colors"
+                      className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs text-xs font-mono font-semibold rounded inline-flex items-center gap-2 transition-colors"
                     >
                       <Search className="w-3.5 h-3.5" />
                       <span>{searchingHistory ? 'SEARCHING...' : 'RUN QUERY'}</span>
@@ -519,10 +519,10 @@ export const WardenConsole = () => {
               </div>
 
               {/* Results Table */}
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg overflow-x-auto">
+              <div className="card overflow-x-auto">
                 <table className="w-full text-left text-2xs font-mono">
                   <thead>
-                    <tr className="border-b border-white/[0.06] text-zinc-500 bg-base">
+                    <tr className="border-b border-zinc-200 text-zinc-500 bg-base">
                       <th className="p-3">VISIT ID</th>
                       <th className="p-3">VISITOR</th>
                       <th className="p-3">HOST ROLL</th>
@@ -541,11 +541,11 @@ export const WardenConsole = () => {
                     ) : (
                       historyResults.map((r) => (
                         <tr key={r.visitId} className="hover:bg-white/[0.02]">
-                          <td className="p-3 text-zinc-400 font-bold">{r.visitId}</td>
-                          <td className="p-3 text-zinc-200">{r.visitorName}</td>
-                          <td className="p-3 text-blue-400">{r.hostStudentRollNumber}</td>
-                          <td className="p-3 text-zinc-300">{new Date(r.actualEntryTime).toLocaleString()}</td>
-                          <td className="p-3 text-zinc-300">
+                          <td className="p-3 text-zinc-600 font-bold">{r.visitId}</td>
+                          <td className="p-3 text-zinc-800">{r.visitorName}</td>
+                          <td className="p-3 text-blue-600">{r.hostStudentRollNumber}</td>
+                          <td className="p-3 text-zinc-700">{new Date(r.actualEntryTime).toLocaleString()}</td>
+                          <td className="p-3 text-zinc-700">
                             {r.actualExitTime ? new Date(r.actualExitTime).toLocaleString() : 'STILL INSIDE'}
                           </td>
                           <td className="p-3">
@@ -563,9 +563,9 @@ export const WardenConsole = () => {
           {/* TAB 3: DAILY ANALYTICS / REPORTS */}
           {activeTab === 'REPORTS' && (
             <div className="space-y-4">
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block">
+                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600 block">
                     DAILY AUDIT & SUMMARY REPORT (FR-043)
                   </span>
                   <div className="text-2xs font-mono text-zinc-500 mt-0.5">
@@ -578,12 +578,12 @@ export const WardenConsole = () => {
                     type="date"
                     value={reportDate}
                     onChange={(e) => setReportDate(e.target.value)}
-                    className="bg-base border border-white/[0.1] rounded px-3 py-1.5 text-xs font-mono text-zinc-200"
+                    className="bg-base border border-zinc-200 rounded px-3 py-1.5 text-xs font-mono text-zinc-800"
                   />
                   <button
                     onClick={handleGenerateReport}
                     disabled={generatingReport}
-                    className="px-4 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors"
                   >
                     <span>{generatingReport ? 'COMPILING...' : 'GENERATE'}</span>
                   </button>
@@ -593,27 +593,27 @@ export const WardenConsole = () => {
               {dailyReportData && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                    <div className="p-4 card">
                       <div className="text-2xs font-mono text-zinc-500">TOTAL VISITS</div>
-                      <div className="text-xl font-mono font-bold text-zinc-100 mt-1">
+                      <div className="text-xl font-mono font-bold text-zinc-900 mt-1">
                         {dailyReportData.summary?.totalVisits || 0}
                       </div>
                     </div>
-                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                    <div className="p-4 card">
                       <div className="text-2xs font-mono text-zinc-500">TOTAL INDIVIDUALS</div>
-                      <div className="text-xl font-mono font-bold text-zinc-100 mt-1">
+                      <div className="text-xl font-mono font-bold text-zinc-900 mt-1">
                         {dailyReportData.summary?.totalVisitorsCount || 0}
                       </div>
                     </div>
-                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                    <div className="p-4 card">
                       <div className="text-2xs font-mono text-zinc-500">OVERSTAYS</div>
                       <div className="text-xl font-mono font-bold text-status-red mt-1">
                         {dailyReportData.summary?.overstayCount || 0}
                       </div>
                     </div>
-                    <div className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg">
+                    <div className="p-4 card">
                       <div className="text-2xs font-mono text-zinc-500">AVG DURATION</div>
-                      <div className="text-xl font-mono font-bold text-zinc-100 mt-1">
+                      <div className="text-xl font-mono font-bold text-zinc-900 mt-1">
                         {dailyReportData.summary?.averageDurationMinutes || 0}m
                       </div>
                     </div>
@@ -625,9 +625,9 @@ export const WardenConsole = () => {
 
           {/* TAB 4: STUDENT DISCIPLINARY STATUS */}
           {activeTab === 'STUDENTS' && (
-            <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-4">
+            <div className="card p-5 space-y-4">
               <div>
-                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block">
+                <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600 block">
                   STUDENT DISCIPLINARY STATUS MANAGEMENT (BR-002)
                 </span>
                 <p className="text-2xs font-mono text-zinc-500 mt-0.5">
@@ -669,7 +669,7 @@ export const WardenConsole = () => {
                 </div>
 
                 {studentActionMsg && (
-                  <div className="p-2.5 rounded bg-base border border-white/[0.08] text-2xs font-mono text-zinc-300">
+                  <div className="p-2.5 rounded bg-base border border-zinc-200 text-2xs font-mono text-zinc-700">
                     {studentActionMsg}
                   </div>
                 )}
@@ -679,10 +679,10 @@ export const WardenConsole = () => {
 
           {activeTab === 'SHIFTS' && (
             <div className="space-y-4">
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-4">
+              <div className="card p-5 space-y-4">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <span className="text-2xs font-mono uppercase tracking-wider text-zinc-300 block">GUARD SHIFT ASSIGNMENTS</span>
+                    <span className="text-2xs font-mono uppercase tracking-wider text-zinc-700 block">GUARD SHIFT ASSIGNMENTS</span>
                     <span className="text-2xs font-mono text-zinc-500">Assign daily duty windows for {selectedHostel}.</span>
                   </div>
                   <div>
@@ -709,17 +709,17 @@ export const WardenConsole = () => {
                     <label className="form-label">END</label>
                     <input type="time" value={shiftForm.endTime} onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })} className="form-input text-xs font-mono" required />
                   </div>
-                  <button disabled={shiftGuards.length === 0} className="py-2 px-3 bg-accent hover:bg-accent-hover text-white rounded text-xs font-mono font-semibold disabled:opacity-50">ASSIGN / UPDATE</button>
+                  <button disabled={shiftGuards.length === 0} className="py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs rounded text-xs font-mono font-semibold disabled:opacity-50">ASSIGN / UPDATE</button>
                 </form>
-                {shiftActionMsg && <div className="text-2xs font-mono text-zinc-300">{shiftActionMsg}</div>}
+                {shiftActionMsg && <div className="text-2xs font-mono text-zinc-700">{shiftActionMsg}</div>}
               </div>
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/[0.06] text-2xs font-mono uppercase tracking-wider text-zinc-400">ASSIGNED SHIFTS · {shiftDate}</div>
+              <div className="card overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-200 text-2xs font-mono uppercase tracking-wider text-zinc-600">ASSIGNED SHIFTS · {shiftDate}</div>
                 {shiftAssignments.length === 0 ? <div className="p-8 text-center text-2xs font-mono text-zinc-600">NO SHIFTS ASSIGNED FOR THIS DATE</div> : (
                   <div className="divide-y divide-white/[0.05]">
                     {shiftAssignments.map((shift) => (
                       <div key={shift.shiftId} className="p-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-                        <div><strong className="text-zinc-100">{shift.guardName}</strong><span className="text-zinc-500"> · {shift.guardId} · {shift.label} · {shift.startTime}–{shift.endTime}</span></div>
+                        <div><strong className="text-zinc-900">{shift.guardName}</strong><span className="text-zinc-500"> · {shift.guardId} · {shift.label} · {shift.startTime}–{shift.endTime}</span></div>
                         <button onClick={() => handleRemoveShift(shift.shiftId)} className="text-status-red hover:text-red-300">REMOVE</button>
                       </div>
                     ))}
@@ -732,9 +732,9 @@ export const WardenConsole = () => {
           {/* TAB 5: STAFF REGISTRY */}
           {activeTab === 'WORKERS' && (
             <div className="space-y-4">
-              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 flex items-center justify-between">
+              <div className="card p-5 flex items-center justify-between">
                 <div>
-                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block">
+                  <span className="text-2xs font-mono uppercase tracking-wider text-zinc-600 block">
                     SERVICE WORKER & CONTRACTOR DIRECTORY (FR-045)
                   </span>
                   <div className="text-2xs font-mono text-zinc-500 mt-0.5">
@@ -744,7 +744,7 @@ export const WardenConsole = () => {
 
                 <button
                   onClick={() => setIsWorkerModalOpen(true)}
-                  className="px-3.5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors"
+                  className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs text-xs font-mono font-semibold rounded inline-flex items-center gap-1.5 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>REGISTER WORKER</span>
@@ -754,26 +754,26 @@ export const WardenConsole = () => {
               {/* Workers Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {(!dashboardData?.workers || dashboardData.workers.length === 0) ? (
-                  <div className="col-span-3 p-8 bg-[#111115] border border-white/[0.06] rounded-lg text-center text-2xs font-mono text-zinc-600">
+                  <div className="col-span-3 p-8 card text-center text-2xs font-mono text-zinc-600">
                     NO WORKERS ENROLLED IN SECTOR
                   </div>
                 ) : (
                   dashboardData.workers.map((w) => (
                     <div
                       key={w.workerId}
-                      className="p-4 bg-[#111115] border border-white/[0.08] rounded-lg flex flex-col justify-between space-y-2"
+                      className="p-4 card flex flex-col justify-between space-y-2"
                     >
                       <div>
                         <div className="flex items-center justify-between">
                           <span className="text-2xs font-mono text-zinc-500">{w.workerId}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
                             {w.workerType}
                           </span>
                         </div>
-                        <div className="text-xs font-bold text-zinc-100 mt-1">{w.fullName}</div>
-                        <div className="text-2xs font-mono text-zinc-400">{w.department} · {w.phoneNumber}</div>
+                        <div className="text-xs font-bold text-zinc-900 mt-1">{w.fullName}</div>
+                        <div className="text-2xs font-mono text-zinc-600">{w.department} · {w.phoneNumber}</div>
                       </div>
-                      <div className="pt-2 border-t border-white/[0.05] text-[10px] font-mono">
+                      <div className="pt-2 border-t border-zinc-200 text-[10px] font-mono">
                         <span className={w.currentlyInside ? 'text-status-green font-bold' : 'text-zinc-500'}>
                           {w.currentlyInside ? '● CURRENTLY INSIDE' : '○ OUTSIDE HOSTEL'}
                         </span>
@@ -790,20 +790,20 @@ export const WardenConsole = () => {
 
       {/* Acknowledge Alert Modal */}
       {ackAlertModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md card shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 bg-base">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-status-red">
                 ACKNOWLEDGE OVERSTAY #{ackAlertModal.alertId}
               </span>
-              <button onClick={() => setAckAlertModal(null)} className="text-zinc-500 hover:text-zinc-200">
+              <button onClick={() => setAckAlertModal(null)} className="text-zinc-500 hover:text-zinc-800">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleAcknowledgeAlert} className="p-5 space-y-4">
-              <p className="text-2xs font-mono text-zinc-400">
-                Acknowledge overstay incident for visitor <strong className="text-zinc-200">{ackAlertModal.visitorName}</strong>. This logs disciplinary review notes into institutional audit trail (BR-010).
+              <p className="text-2xs font-mono text-zinc-600">
+                Acknowledge overstay incident for visitor <strong className="text-zinc-800">{ackAlertModal.visitorName}</strong>. This logs disciplinary review notes into institutional audit trail (BR-010).
               </p>
 
               <div>
@@ -818,11 +818,11 @@ export const WardenConsole = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setAckAlertModal(null)}
-                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
+                  className="px-4 py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-700 rounded text-xs font-mono font-semibold"
                 >
                   CANCEL
                 </button>
@@ -841,13 +841,13 @@ export const WardenConsole = () => {
 
       {/* Register Worker Modal */}
       {isWorkerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md card shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 bg-base">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-800">
                 REGISTER SERVICE WORKER
               </span>
-              <button onClick={() => setIsWorkerModalOpen(false)} className="text-zinc-500 hover:text-zinc-200">
+              <button onClick={() => setIsWorkerModalOpen(false)} className="text-zinc-500 hover:text-zinc-800">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -902,17 +902,17 @@ export const WardenConsole = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setIsWorkerModalOpen(false)}
-                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
+                  className="px-4 py-2 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 text-zinc-700 rounded text-xs font-mono font-semibold"
                 >
                   CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded text-xs font-mono font-semibold transition-colors"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs rounded text-xs font-mono font-semibold transition-colors"
                 >
                   ENROLL STAFF
                 </button>

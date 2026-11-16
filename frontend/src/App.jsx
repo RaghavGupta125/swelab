@@ -57,7 +57,7 @@ export const App = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-base text-zinc-100 flex flex-col font-sans">
+        <div className="min-h-screen bg-base text-zinc-900 flex flex-col font-sans">
           <Navbar />
           <main className="flex-1">
             <Routes>
