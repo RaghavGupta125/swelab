@@ -12,6 +12,7 @@ import {
 import { generateDailyTrafficReport } from '../services/reportService.js';
 import { getISTParts } from '../utils/timeUtils.js';
 import { AuditLog } from '../models/AuditLog.js';
+import { USER_STATUS } from '../config/constants.js';
 
 export const getWardenDashboard = async (req, res, next) => {
   try {
@@ -99,6 +100,10 @@ export const updateStudentAccountStatus = async (req, res, next) => {
   try {
     const { rollNumber } = req.params;
     const { status } = req.body;
+
+    if (!Object.values(USER_STATUS).includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid account status.' });
+    }
 
     const studentProfile = await StudentProfile.findOne({ rollNumber: rollNumber.toUpperCase() });
     if (!studentProfile) {

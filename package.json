@@ -6,6 +6,7 @@
   "scripts": {
     "start": "cd backend && npm start",
     "seed": "cd backend && npm run seed",
+    "dev": "nodemon --watch backend --exec \"npm run dev:backend\" & nodemon --watch frontend --exec \"npm run dev:frontend\"",
     "test": "cd backend && npm test",
     "build": "cd frontend && npm run build",
     "dev:backend": "cd backend && npm run dev",
@@ -17,5 +18,8 @@
     "lnmiit",
     "mern"
   ],
-  "author": "Team T049 (Malapati Charith, Atharva Sharma, Raghav Gupta, Rudraksh Tank)"
+  "author": "Team T049 (Malapati Charith, Atharva Sharma, Raghav Gupta, Rudraksh Tank)",
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
 }

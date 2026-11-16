@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Shield, Lock, User, AlertCircle, ArrowRight, QrCode, CheckCircle2 } from 'lucide-react';
@@ -56,6 +56,26 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [ssoEnabled, setSsoEnabled] = useState(false);
+
+  useEffect(() => {
+    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const ssoToken = fragment.get('ssoToken');
+    const ssoError = fragment.get('ssoError');
+    if (ssoToken) {
+      localStorage.setItem('hg_token', ssoToken);
+      window.location.replace('/');
+      return;
+    }
+    if (ssoError) {
+      setError(ssoError);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    fetch('/api/auth/sso/config')
+      .then((response) => response.json())
+      .then((data) => setSsoEnabled(Boolean(data.enabled)))
+      .catch(() => setSsoEnabled(false));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -181,6 +201,12 @@ export const Login = () => {
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </form>
+
+            {ssoEnabled && (
+              <a href="/api/auth/sso/start" className="mt-3 w-full py-2.5 bg-[#252529] hover:bg-[#303036] text-zinc-100 text-xs font-semibold rounded font-mono uppercase tracking-wider flex items-center justify-center transition-colors">
+                SIGN IN WITH INSTITUTION
+              </a>
+            )}
 
             {/* 1-Click Evaluation Fast-Fill Matrix */}
             <div className="mt-6 pt-5 border-t border-white/[0.06]">

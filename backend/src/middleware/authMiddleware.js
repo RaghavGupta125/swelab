@@ -78,6 +78,13 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
+export const authenticateOptional = (req, res, next) => {
+  const hasBearer = req.headers.authorization?.startsWith('Bearer ');
+  const hasCookie = Boolean(req.cookies?.token);
+  if (!hasBearer && !hasCookie) return next();
+  return authenticate(req, res, next);
+};
+
 /**
  * RBAC authorization middleware (FR-005)
  */

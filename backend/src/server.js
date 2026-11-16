@@ -4,6 +4,7 @@ dotenv.config();
 import app from './app.js';
 import { connectDB } from './config/db.js';
 import { startScheduler } from './jobs/scheduler.js';
+import { startDirectorySync } from './jobs/directorySync.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -13,6 +14,7 @@ const startServer = async () => {
     
     // Start background overstay and timeout scheduler
     startScheduler(30000); // scan every 30 seconds
+    startDirectorySync();
 
     app.listen(PORT, () => {
       console.log(`=======================================================`);

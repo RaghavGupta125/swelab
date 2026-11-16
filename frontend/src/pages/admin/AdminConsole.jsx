@@ -28,11 +28,16 @@ export const AdminConsole = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [directorySyncEnabled, setDirectorySyncEnabled] = useState(false);
+  const [directorySyncing, setDirectorySyncing] = useState(false);
+  const [directorySyncMessage, setDirectorySyncMessage] = useState('');
+  const [roleAssignment, setRoleAssignment] = useState(null);
 
   useEffect(() => {
     loadOverview();
     loadUsers();
     loadAuditLogs();
+    api.getDirectorySyncStatus().then((res) => setDirectorySyncEnabled(Boolean(res.enabled))).catch(() => setDirectorySyncEnabled(false));
   }, []);
 
   const loadOverview = async () => {
@@ -79,12 +84,53 @@ export const AdminConsole = () => {
     }
   };
 
-  const handleAssignRole = async (userId, newRole) => {
+  const handleAssignRole = async (user, newRole) => {
+    if (newRole === user.role) return;
+    if (['STUDENT', 'GUARD', 'WARDEN'].includes(newRole)) {
+      const seedId = user.userId || '';
+      setRoleAssignment({
+        user,
+        role: newRole,
+        profile: newRole === 'STUDENT'
+          ? { studentId: seedId, rollNumber: seedId, hostelId: '', roomNumber: '' }
+          : newRole === 'GUARD'
+            ? { guardId: seedId, assignedHostelId: '' }
+            : { wardenId: seedId, assignedHostelId: '' }
+      });
+      return;
+    }
     try {
-      await api.assignUserRole(userId, newRole);
+      await api.assignUserRole(user.userId, newRole);
       loadUsers();
     } catch (err) {
       alert(err.message || 'Failed to assign role.');
+    }
+  };
+
+  const saveRoleAssignment = async (event) => {
+    event.preventDefault();
+    if (!roleAssignment) return;
+    try {
+      await api.assignUserRole(roleAssignment.user.userId, roleAssignment.role, roleAssignment.profile);
+      setRoleAssignment(null);
+      await loadUsers();
+    } catch (err) {
+      alert(err.message || 'Failed to assign role.');
+    }
+  };
+
+  const handleDirectorySync = async () => {
+    setDirectorySyncing(true);
+    setDirectorySyncMessage('');
+    try {
+      const res = await api.syncStudentDirectory();
+      const { created = 0, updated = 0, skipped = 0 } = res.summary || {};
+      setDirectorySyncMessage(`Directory sync complete · ${created} added · ${updated} updated · ${skipped} skipped`);
+      await loadUsers();
+    } catch (err) {
+      setDirectorySyncMessage(`Directory sync failed: ${err.message}`);
+    } finally {
+      setDirectorySyncing(false);
     }
   };
 
@@ -199,7 +245,6 @@ export const AdminConsole = () => {
                   <option value="ACTIVE">ACTIVE</option>
                   <option value="INACTIVE">INACTIVE</option>
                   <option value="BLOCKED">BLOCKED</option>
-                  <option value="SUSPENDED">SUSPENDED</option>
                 </select>
                 <button
                   onClick={loadUsers}
@@ -207,7 +252,13 @@ export const AdminConsole = () => {
                 >
                   FILTER
                 </button>
+                {directorySyncEnabled && <button
+                  onClick={handleDirectorySync}
+                  disabled={directorySyncing}
+                  className="px-3 py-1.5 bg-[#252529] hover:bg-[#303036] text-zinc-100 rounded text-2xs font-mono font-semibold transition-colors disabled:opacity-50"
+                >{directorySyncing ? 'SYNCING…' : 'SYNC STUDENT DIRECTORY'}</button>}
               </div>
+              {directorySyncMessage && <div className="text-2xs font-mono text-zinc-300">{directorySyncMessage}</div>}
 
               {/* Users Table */}
               <div className="bg-[#111115] border border-white/[0.08] rounded-lg overflow-x-auto">
@@ -230,7 +281,7 @@ export const AdminConsole = () => {
                       </tr>
                     ) : (
                       usersList.map((u) => (
-                        <tr key={u._id} className="hover:bg-white/[0.02]">
+                        <tr key={u.userId} className="hover:bg-white/[0.02]">
                           <td className="p-3">
                             <div className="text-zinc-100 font-bold">{u.name}</div>
                             <div className="text-zinc-500 text-[10px]">{u.email}</div>
@@ -242,7 +293,7 @@ export const AdminConsole = () => {
                           <td className="p-3">
                             <select
                               value={u.role}
-                              onChange={(e) => handleAssignRole(u._id, e.target.value)}
+                              onChange={(e) => handleAssignRole(u, e.target.value)}
                               className="bg-base border border-white/[0.08] rounded px-2 py-1 text-2xs font-mono text-zinc-200"
                             >
                               <option value="STUDENT">STUDENT</option>
@@ -252,18 +303,18 @@ export const AdminConsole = () => {
                             </select>
                           </td>
                           <td className="p-3">
-                            <StatusBadge status={u.status} />
+                            <StatusBadge status={u.accountStatus} />
                           </td>
                           <td className="p-3 text-right">
                             <button
-                              onClick={() => handleUpdateStatus(u._id, u.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE')}
+                              onClick={() => handleUpdateStatus(u.userId, u.accountStatus === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE')}
                               className={`px-2.5 py-1 rounded text-2xs font-mono font-semibold transition-colors ${
-                                u.status === 'ACTIVE'
+                                u.accountStatus === 'ACTIVE'
                                   ? 'bg-[#252529] hover:bg-status-red hover:text-white text-zinc-400 border border-white/[0.08]'
                                   : 'bg-status-green hover:bg-green-600 text-black'
                               }`}
                             >
-                              {u.status === 'ACTIVE' ? 'BLOCK' : 'ACTIVATE'}
+                              {u.accountStatus === 'ACTIVE' ? 'BLOCK' : 'ACTIVATE'}
                             </button>
                           </td>
                         </tr>
@@ -353,6 +404,37 @@ export const AdminConsole = () => {
 
         </div>
       </div>
+
+      {roleAssignment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <form onSubmit={saveRoleAssignment} className="w-full max-w-lg bg-[#111115] border border-white/10 rounded-lg shadow-2xl p-5 space-y-4">
+            <div>
+              <h2 className="font-mono text-xs font-bold uppercase text-zinc-100">Assign {roleAssignment.role} profile</h2>
+              <p className="text-2xs font-mono text-zinc-500 mt-1">{roleAssignment.user.name} · {roleAssignment.user.userId}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {roleAssignment.role === 'STUDENT' && <>
+                <label className="form-label">STUDENT ID<input required value={roleAssignment.profile.studentId} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, studentId: e.target.value } })} className="form-input mt-1 text-xs font-mono" /></label>
+                <label className="form-label">ROLL NUMBER<input required value={roleAssignment.profile.rollNumber} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, rollNumber: e.target.value.toUpperCase() } })} className="form-input mt-1 text-xs font-mono" /></label>
+                <label className="form-label">HOSTEL<select required value={roleAssignment.profile.hostelId} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, hostelId: e.target.value } })} className="form-input mt-1 text-xs font-mono"><option value="">Select hostel</option>{['BH1','BH2','BH3','BH4','BH5','GH'].map((id) => <option key={id} value={id}>{id}</option>)}</select></label>
+                <label className="form-label">ROOM<input required value={roleAssignment.profile.roomNumber} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, roomNumber: e.target.value } })} className="form-input mt-1 text-xs font-mono" /></label>
+              </>}
+              {roleAssignment.role === 'GUARD' && <>
+                <label className="form-label">GUARD ID<input required value={roleAssignment.profile.guardId} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, guardId: e.target.value } })} className="form-input mt-1 text-xs font-mono" /></label>
+                <label className="form-label">ASSIGNED HOSTEL<select required value={roleAssignment.profile.assignedHostelId} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, assignedHostelId: e.target.value } })} className="form-input mt-1 text-xs font-mono"><option value="">Select hostel</option>{['BH1','BH2','BH3','BH4','BH5','GH'].map((id) => <option key={id} value={id}>{id}</option>)}</select></label>
+              </>}
+              {roleAssignment.role === 'WARDEN' && <>
+                <label className="form-label">WARDEN ID<input required value={roleAssignment.profile.wardenId} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, wardenId: e.target.value } })} className="form-input mt-1 text-xs font-mono" /></label>
+                <label className="form-label">ASSIGNED HOSTEL<select required value={roleAssignment.profile.assignedHostelId} onChange={(e) => setRoleAssignment({ ...roleAssignment, profile: { ...roleAssignment.profile, assignedHostelId: e.target.value } })} className="form-input mt-1 text-xs font-mono"><option value="">Select hostel</option>{['BH1','BH2','BH3','BH4','BH5','GH'].map((id) => <option key={id} value={id}>{id}</option>)}</select></label>
+              </>}
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
+              <button type="button" onClick={() => setRoleAssignment(null)} className="px-4 py-2 bg-[#252529] text-zinc-300 rounded text-xs font-mono">CANCEL</button>
+              <button type="submit" className="px-4 py-2 bg-accent text-white rounded text-xs font-mono font-semibold">SAVE ROLE</button>
+            </div>
+          </form>
+        </div>
+      )}
 
     </div>
   );

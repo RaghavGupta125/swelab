@@ -4,7 +4,9 @@ import {
   updateUserStatus,
   assignUserRole,
   getSystemOverview,
-  getAuditLogs
+  getAuditLogs,
+  getDirectorySyncStatus,
+  runDirectorySync
 } from '../controllers/adminController.js';
 import { authenticate, authorizeRoles } from '../middleware/authMiddleware.js';
 
@@ -18,5 +20,7 @@ router.get('/users', getAllUsers);
 router.patch('/users/:userId/status', updateUserStatus);
 router.patch('/users/:userId/role', assignUserRole);
 router.get('/audit-logs', getAuditLogs);
+router.get('/directory/status', getDirectorySyncStatus);
+router.post('/directory/sync', runDirectorySync);
 
 export default router;

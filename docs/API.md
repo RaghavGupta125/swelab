@@ -30,6 +30,11 @@ Terminates active session and clears authentication cookies (FR-003).
 ### `GET /api/auth/me`
 Fetches current authenticated user and linked role profile.
 
+### Optional institutional OIDC sign-in
+- `GET /api/auth/sso/config` reports whether OIDC settings are configured.
+- `GET /api/auth/sso/start` begins the authorization-code flow with PKCE.
+- `GET /api/auth/sso/callback` validates provider state, nonce, issuer, audience, and signing key, then matches a verified email to an active HostGuard account.
+
 ---
 
 ## 2. Visit Request Lifecycle
@@ -73,6 +78,15 @@ Host student approves pending visit request (FR-022). Generates dynamic QR Pass.
 ### `POST /api/requests/:requestId/reject`
 Host student declines visit request with optional reason (FR-024, FR-025).
 
+### `PUT /api/requests/:requestId`
+Updates a DRAFT or PENDING request. Host students may edit requests for their own roll number. Visitors must include the request's private `accessToken` in the body.
+
+### `POST /api/requests/:requestId/submit`
+Submits a completed DRAFT for host approval. Visitors must include their private `accessToken`; signed-in students may submit their own requests.
+
+### `POST /api/requests/:requestId/cancel`
+Cancels a request before gate entry. Host students may cancel requests for their own roll number; visitors must include their private `accessToken`.
+
 ---
 
 ## 3. Gate Operations & Verification
@@ -110,6 +124,12 @@ Clocks out guard upon shift completion (FR-044).
 ### `GET /api/attendance/my-status`
 Returns current guard shift state (BR-011 active duty validation).
 
+### Warden shift assignments
+- `GET /api/attendance/guards?hostelId=BH1` lists active guards assigned to a hostel.
+- `GET /api/attendance/assignments?date=YYYY-MM-DD&hostelId=BH1` lists assigned shifts.
+- `POST /api/attendance/assignments` creates or updates a guard shift for a date.
+- `DELETE /api/attendance/assignments/:shiftId` removes an assignment before attendance is recorded.
+
 ---
 
 ## 5. Hostel Warden Operations
@@ -142,3 +162,7 @@ Logs entry/exit of maintenance personnel with facility authorization validation 
 Multi-criteria searchable visit log (date range, roll number, visitor name, guard ID, overstay status).
 ### `GET /api/reports/daily-summary`
 Daily traffic audit report with totals, exits, active visits, and overstay violations (FR-051).
+
+### Admin directory sync (optional)
+- `GET /api/admin/directory/status` reports whether a student directory feed is configured.
+- `POST /api/admin/directory/sync` imports student records from the configured JSON feed.

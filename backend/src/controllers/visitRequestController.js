@@ -6,7 +6,9 @@ import {
   approveVisitRequest,
   rejectVisitRequest,
   cancelVisitRequest,
-  getActiveVisitorCountForHost
+  getActiveVisitorCountForHost,
+  updateVisitRequest,
+  submitVisitDraft
 } from '../services/visitRequestService.js';
 import { REQUEST_STATUS } from '../config/constants.js';
 import { AuditLog } from '../models/AuditLog.js';
@@ -49,14 +51,19 @@ export const getRequestByTokenOrId = async (req, res, next) => {
       });
     }
 
+    const privateLookup = request.accessToken === id;
+    const authenticatedHost = req.user?.role === 'ADMIN' || req.studentProfile?.rollNumber === request.hostStudentRollNumber;
     let qrPass = null;
-    if (request.requestStatus === REQUEST_STATUS.APPROVED) {
+    if (request.requestStatus === REQUEST_STATUS.APPROVED && (privateLookup || authenticatedHost)) {
       qrPass = await QRPass.findOne({ requestId: request.requestId });
     }
 
+    const publicRequest = request.toObject();
+    delete publicRequest.accessToken;
+
     return res.status(200).json({
       success: true,
-      request,
+      request: publicRequest,
       qrPass
     });
   } catch (error) {
@@ -92,9 +99,12 @@ export const getStudentDashboardData = async (req, res, next) => {
       data: {
         studentProfile: req.studentProfile,
         activeVisitorCount,
+        activeVisitorsCount: activeVisitorCount,
         maxQuota: 5,
         pendingRequests,
-        historicalRequests
+        historicalRequests,
+        history: historicalRequests,
+        approvedRequests: historicalRequests.filter((request) => request.requestStatus === REQUEST_STATUS.APPROVED)
       }
     });
   } catch (error) {
@@ -151,13 +161,32 @@ export const rejectRequest = async (req, res, next) => {
 export const cancelRequest = async (req, res, next) => {
   try {
     const { requestId } = req.params;
-    const request = await cancelVisitRequest(requestId, req.user);
+    const request = await cancelVisitRequest(requestId, req.user, req.body?.accessToken);
 
     return res.status(200).json({
       success: true,
       message: 'Visit request cancelled.',
       request
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateRequest = async (req, res, next) => {
+  try {
+    const { requestId } = req.params;
+    const request = await updateVisitRequest(requestId, req.body, req.user, req.body?.accessToken);
+    return res.status(200).json({ success: true, message: 'Visit request updated.', request });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const submitDraft = async (req, res, next) => {
+  try {
+    const request = await submitVisitDraft(req.params.requestId, req.user, req.body?.accessToken);
+    return res.status(200).json({ success: true, message: 'Draft submitted to the host for approval.', request });
   } catch (error) {
     next(error);
   }

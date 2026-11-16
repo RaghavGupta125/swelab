@@ -1,3 +1,12 @@
+// =============================================================================
+// HOSTGUARD SYSTEM CONSTANTS & BUSINESS RULES
+// LNMIIT CS314 Team T049 (Authoritative Source: T049(1).pdf)
+//
+// 💡 VIVA CHEAT CODE: If the examiner asks you to modify any institutional rule
+// (e.g., change quota, shift gate hours, adjust approval timeouts), THIS is the
+// single file you edit!
+// =============================================================================
+
 // System Roles as defined in T049(1).pdf
 export const ROLES = Object.freeze({
   STUDENT: 'STUDENT',

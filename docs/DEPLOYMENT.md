@@ -96,3 +96,30 @@ If deploying frontend independently:
 2. Build command: `npm run build`
 3. Output directory: `dist`
 4. Set `VITE_API_BASE_URL=https://<your-backend-api-domain>`
+
+### Institutional OpenID Connect
+
+Register `https://<your-backend-domain>/api/auth/sso/callback` with the provider and configure `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_REDIRECT_URI`. HostGuard matches the provider's verified email to an existing active account. Use directory sync or the admin console to provision accounts first. SAML and other protocols need an institution-specific adapter.
+
+### Student Directory Feed
+
+Set `DIRECTORY_SYNC_URL` to an HTTPS endpoint that returns normalized JSON:
+
+```json
+{
+  "students": [
+    {
+      "rollNumber": "24UCS049",
+      "studentId": "24UCS049",
+      "name": "Example Student",
+      "email": "student@example.edu",
+      "phoneNumber": "+911234567890",
+      "hostelId": "BH1",
+      "roomNumber": "B-201",
+      "program": "B.Tech CSE"
+    }
+  ]
+}
+```
+
+The endpoint is called with `Authorization: Bearer <DIRECTORY_SYNC_TOKEN>`. Sync runs at startup and every 15 minutes; administrators can also trigger it manually. Existing non-student accounts are not converted, and blocked/inactive status is preserved. An institution-managed adapter may be needed to map the SIS API to this feed format.

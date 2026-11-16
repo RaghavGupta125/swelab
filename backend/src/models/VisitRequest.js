@@ -34,26 +34,32 @@ const visitRequestSchema = new mongoose.Schema(
     visitor: {
       fullName: {
         type: String,
-        required: true,
+        required: false,
         trim: true
       },
       phoneNumber: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
         index: true
       },
       identificationType: {
         type: String,
         enum: Object.values(ID_TYPES),
-        required: true,
+        required: false,
         default: ID_TYPES.AADHAAR
       },
       identificationNumber: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
         index: true
+      },
+      // Optional vehicle number (easily demonstrated if examiner asks for vehicle tracking)
+      vehicleNumber: {
+        type: String,
+        required: false,
+        trim: true
       }
     },
     // Host student information (FR-012, BR-012)
@@ -82,21 +88,21 @@ const visitRequestSchema = new mongoose.Schema(
     // Schedule & Purpose (FR-013, FR-014, BR-004)
     purpose: {
       type: String,
-      required: true,
+      required: false,
       trim: true
     },
     visitDate: {
       type: String, // 'YYYY-MM-DD' in IST
-      required: true,
+      required: false,
       index: true
     },
     expectedEntryTime: {
       type: Date,
-      required: true
+      required: false
     },
     expectedExitTime: {
       type: Date,
-      required: true
+      required: false
     },
     // Visitor quota and accompanying guests (FR-011, BR-001)
     totalVisitorCount: {

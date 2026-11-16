@@ -55,6 +55,16 @@ const CountdownTimer = ({ createdAt }) => {
   );
 };
 
+const getISTTimeInput = (value) => {
+  if (!value) return '';
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(new Date(value));
+  const hour = parts.find((part) => part.type === 'hour')?.value;
+  const minute = parts.find((part) => part.type === 'minute')?.value;
+  return hour && minute ? `${hour}:${minute}` : '';
+};
+
 export const StudentPortal = () => {
   const { user } = useAuth();
   const rollNumber = user?.profile?.rollNumber || '';
@@ -72,6 +82,7 @@ export const StudentPortal = () => {
 
   // Pre-registration modal state
   const [isPreRegisterOpen, setIsPreRegisterOpen] = useState(false);
+  const [editingRequestId, setEditingRequestId] = useState(null);
   const [preRegLoading, setPreRegLoading] = useState(false);
   const [preRegForm, setPreRegForm] = useState({
     visitorName: '',
@@ -166,11 +177,20 @@ export const StudentPortal = () => {
           : [],
       };
 
-      const res = await api.createRequest(payload);
+      let res;
+      if (editingRequestId) {
+        res = await api.updateRequest(editingRequestId, payload);
+        if (dashboardData?.historicalRequests?.find((request) => request.requestId === editingRequestId)?.requestStatus === 'DRAFT') {
+          res = await api.submitDraft(editingRequestId);
+        }
+      } else {
+        res = await api.createRequest(payload);
+      }
       setActionMessage({
         type: 'success',
-        text: `Pre-registration created (ID: ${res.request.requestId}). You may now approve it below.`,
+        text: editingRequestId ? `Request ${editingRequestId} updated.` : `Pre-registration created (ID: ${res.request.requestId}).`,
       });
+      setEditingRequestId(null);
       setIsPreRegisterOpen(false);
       setPreRegForm({
         visitorName: '',
@@ -191,6 +211,57 @@ export const StudentPortal = () => {
       });
     } finally {
       setPreRegLoading(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    setPreRegLoading(true);
+    setActionMessage({ type: '', text: '' });
+    try {
+      const payload = {
+        ...preRegForm,
+        hostStudentRollNumber: rollNumber,
+        hostelId,
+        roomNumber,
+        accompanyingGuests: preRegForm.accompanyingGuestName ? [{ name: preRegForm.accompanyingGuestName }] : []
+      };
+      if (editingRequestId) await api.updateRequest(editingRequestId, payload);
+      else await api.createRequest({ ...payload, isDraft: true });
+      setActionMessage({ type: 'success', text: 'Draft saved. You can finish it from the visit archive.' });
+      setEditingRequestId(null);
+      setIsPreRegisterOpen(false);
+      loadDashboard();
+    } catch (err) {
+      setActionMessage({ type: 'error', text: err.message || 'Draft could not be saved.' });
+    } finally {
+      setPreRegLoading(false);
+    }
+  };
+
+  const handleEditRequest = (request) => {
+    setEditingRequestId(request.requestId);
+    setPreRegForm({
+      visitorName: request.visitor?.fullName || '',
+      visitorPhone: request.visitor?.phoneNumber || '',
+      identificationType: request.visitor?.identificationType || 'Aadhaar Card',
+      identificationNumber: request.visitor?.identificationNumber || '',
+      purpose: request.purpose || '',
+      visitDate: request.visitDate || '',
+      expectedEntryTimeStr: getISTTimeInput(request.expectedEntryTime),
+      expectedExitTimeStr: getISTTimeInput(request.expectedExitTime),
+      accompanyingGuestName: request.accompanyingGuests?.[0]?.name || ''
+    });
+    setIsPreRegisterOpen(true);
+  };
+
+  const handleCancelRequest = async (requestId) => {
+    if (!window.confirm(`Cancel visit request ${requestId}?`)) return;
+    try {
+      await api.cancelRequest(requestId);
+      setActionMessage({ type: 'success', text: `Request ${requestId} cancelled.` });
+      loadDashboard();
+    } catch (err) {
+      setActionMessage({ type: 'error', text: err.message || 'Request could not be cancelled.' });
     }
   };
 
@@ -332,13 +403,25 @@ export const StudentPortal = () => {
                     <div className="mt-2 p-2 rounded bg-base border border-white/[0.04] text-2xs font-mono">
                       <span className="text-zinc-500">ACCOMPANYING GUESTS (+{req.accompanyingGuests.length}): </span>
                       <span className="text-zinc-300">
-                        {req.accompanyingGuests.map((g) => g.fullName).join(', ')}
+                        {req.accompanyingGuests.map((g) => g.name).join(', ')}
                       </span>
                     </div>
                   )}
                 </div>
 
                 <div className="pt-3 border-t border-white/[0.06] flex items-center gap-2">
+                  <button
+                    onClick={() => handleEditRequest(req)}
+                    className="flex-1 py-2 bg-base hover:bg-white/[0.06] text-blue-400 text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                  >
+                    EDIT
+                  </button>
+                  <button
+                    onClick={() => handleCancelRequest(req.requestId)}
+                    className="flex-1 py-2 bg-base hover:bg-status-redBg text-status-red text-xs font-mono font-semibold rounded border border-white/[0.08] transition-colors"
+                  >
+                    CANCEL
+                  </button>
                   <button
                     onClick={() => {
                       setRejectModalReq(req);
@@ -397,7 +480,7 @@ export const StudentPortal = () => {
                 </div>
 
                 <Link
-                  to={`/pass/${req.requestId}`}
+                  to={`/pass/${req.accessToken || req.requestId}`}
                   className="py-1.5 rounded bg-base hover:bg-white/[0.05] border border-white/[0.07] text-2xs font-mono text-blue-400 hover:text-blue-300 flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <QrCode className="w-3.5 h-3.5" />
@@ -418,7 +501,7 @@ export const StudentPortal = () => {
 
           {/* Filter Pills */}
           <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-            {['ALL', 'APPROVED', 'REJECTED', 'EXPIRED', 'CANCELLED'].map((st) => (
+            {['ALL', 'DRAFT', 'APPROVED', 'REJECTED', 'EXPIRED', 'CANCELLED'].map((st) => (
               <button
                 key={st}
                 onClick={() => setHistoryFilter(st)}
@@ -444,12 +527,13 @@ export const StudentPortal = () => {
                 <th className="p-3">DATE / SCHEDULE</th>
                 <th className="p-3">GUESTS</th>
                 <th className="p-3">STATUS</th>
+                <th className="p-3">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {filteredHistory.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-zinc-600">
+                  <td colSpan={7} className="p-8 text-center text-zinc-600">
                     NO VISIT RECORDS MATCHING FILTER
                   </td>
                 </tr>
@@ -463,9 +547,9 @@ export const StudentPortal = () => {
                     </td>
                     <td className="p-3 text-zinc-400 truncate max-w-[160px]">{item.purpose}</td>
                     <td className="p-3 text-zinc-400">
-                      <div>{new Date(item.visitDate).toLocaleDateString()}</div>
+                      <div>{item.visitDate ? new Date(item.visitDate).toLocaleDateString() : 'DATE NOT SET'}</div>
                       <div className="text-zinc-500 text-[10px]">
-                        {new Date(item.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {item.expectedEntryTime ? new Date(item.expectedEntryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TIME NOT SET'}
                       </div>
                     </td>
                     <td className="p-3 text-zinc-400">
@@ -473,6 +557,12 @@ export const StudentPortal = () => {
                     </td>
                     <td className="p-3">
                       <StatusBadge status={item.requestStatus} />
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-2">
+                        {['DRAFT', 'PENDING'].includes(item.requestStatus) && <button onClick={() => handleEditRequest(item)} className="text-blue-400 hover:text-blue-300">EDIT</button>}
+                        {['DRAFT', 'PENDING', 'APPROVED'].includes(item.requestStatus) && <button onClick={() => handleCancelRequest(item.requestId)} className="text-status-red hover:text-red-300">CANCEL</button>}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -488,7 +578,7 @@ export const StudentPortal = () => {
           <div className="w-full max-w-lg bg-[#111115] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] bg-base">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-200">
-                PRE-REGISTER VISITOR CLEARANCE
+                {editingRequestId ? `EDIT REQUEST ${editingRequestId}` : 'PRE-REGISTER VISITOR CLEARANCE'}
               </span>
               <button
                 onClick={() => setIsPreRegisterOpen(false)}
@@ -611,17 +701,25 @@ export const StudentPortal = () => {
               <div className="flex justify-end gap-2 pt-4 border-t border-white/[0.06]">
                 <button
                   type="button"
-                  onClick={() => setIsPreRegisterOpen(false)}
+                  onClick={() => { setIsPreRegisterOpen(false); setEditingRequestId(null); }}
                   className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-300 rounded text-xs font-mono font-semibold"
                 >
                   CANCEL
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  disabled={preRegLoading}
+                  className="px-4 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-200 rounded text-xs font-mono font-semibold disabled:opacity-50"
+                >
+                  {editingRequestId && dashboardData?.historicalRequests?.find((request) => request.requestId === editingRequestId)?.requestStatus !== 'DRAFT' ? 'SAVE CHANGES' : 'SAVE DRAFT'}
                 </button>
                 <button
                   type="submit"
                   disabled={preRegLoading}
                   className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded text-xs font-mono font-semibold transition-colors disabled:opacity-50"
                 >
-                  {preRegLoading ? 'SUBMITTING...' : 'CREATE PRE-REGISTRATION'}
+                  {preRegLoading ? 'SAVING...' : editingRequestId ? 'SAVE REQUEST' : 'CREATE PRE-REGISTRATION'}
                 </button>
               </div>
             </form>

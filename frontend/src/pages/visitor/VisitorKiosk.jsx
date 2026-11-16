@@ -16,6 +16,14 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const getISTTimeInput = (value) => {
+  if (!value) return '';
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date(value));
+  const hour = parts.find((part) => part.type === 'hour')?.value;
+  const minute = parts.find((part) => part.type === 'minute')?.value;
+  return hour && minute ? `${hour}:${minute}` : '';
+};
+
 export const VisitorKiosk = () => {
   const [activeTab, setActiveTab] = useState('REGISTER'); // 'REGISTER' | 'STATUS'
 
@@ -38,12 +46,14 @@ export const VisitorKiosk = () => {
   const [guestNameInput, setGuestNameInput] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submittedRequest, setSubmittedRequest] = useState(null);
+  const [editingRequest, setEditingRequest] = useState(null);
   const [formError, setFormError] = useState('');
 
   // Status Search State
   const [searchRequestId, setSearchRequestId] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [trackedRequest, setTrackedRequest] = useState(null);
+  const [trackedAccessToken, setTrackedAccessToken] = useState('');
   const [searchError, setSearchError] = useState('');
 
   const handleAddGuest = () => {
@@ -72,14 +82,69 @@ export const VisitorKiosk = () => {
     setSubmitLoading(true);
 
     try {
-      const res = await api.createRequest(formData);
+      let res = editingRequest
+        ? await api.updateRequest(editingRequest.requestId, { ...formData, accessToken: editingRequest.accessToken })
+        : await api.createRequest(formData);
+      if (editingRequest?.requestStatus === 'DRAFT') res = await api.submitDraft(editingRequest.requestId, editingRequest.accessToken);
       if (res.success && res.request) {
         setSubmittedRequest(res.request);
+        if (res.request.accessToken) sessionStorage.setItem(`hg_access_${res.request.requestId}`, res.request.accessToken);
+        setEditingRequest(null);
       }
     } catch (err) {
       setFormError(err.message || 'Registration failed.');
     } finally {
       setSubmitLoading(false);
+    }
+  };
+
+  const startEditingRequest = (request) => {
+    setEditingRequest({ requestId: request.requestId, requestStatus: request.requestStatus, accessToken: request.accessToken || trackedAccessToken });
+    setFormData({
+      visitorName: request.visitor?.fullName || '',
+      visitorPhone: request.visitor?.phoneNumber || '',
+      identificationType: request.visitor?.identificationType || 'Aadhaar Card',
+      identificationNumber: request.visitor?.identificationNumber || '',
+      hostStudentRollNumber: request.hostStudentRollNumber || '',
+      hostelId: request.hostelId || 'BH1',
+      roomNumber: request.roomNumber || '',
+      purpose: request.purpose || '',
+      visitDate: request.visitDate || '',
+      expectedEntryTimeStr: getISTTimeInput(request.expectedEntryTime),
+      expectedExitTimeStr: getISTTimeInput(request.expectedExitTime),
+      accompanyingGuests: request.accompanyingGuests || []
+    });
+    setSubmittedRequest(null);
+    setActiveTab('REGISTER');
+  };
+
+  const handleSaveVisitorDraft = async () => {
+    setFormError('');
+    setSubmitLoading(true);
+    try {
+      const res = editingRequest
+        ? await api.updateRequest(editingRequest.requestId, { ...formData, accessToken: editingRequest.accessToken })
+        : await api.createRequest({ ...formData, isDraft: true });
+      if (res.success && res.request) {
+        setSubmittedRequest(res.request);
+        setEditingRequest(null);
+        if (res.request.accessToken) sessionStorage.setItem(`hg_access_${res.request.requestId}`, res.request.accessToken);
+      }
+    } catch (err) {
+      setFormError(err.message || 'Draft could not be saved. Enter the host roll number and try again.');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const cancelTrackedRequest = async () => {
+    const request = trackedRequest?.request;
+    if (!request || !window.confirm(`Cancel request ${request.requestId}?`)) return;
+    try {
+      await api.cancelRequest(request.requestId, trackedAccessToken);
+      setTrackedRequest({ ...trackedRequest, request: { ...request, requestStatus: 'CANCELLED' } });
+    } catch (err) {
+      setSearchError(err.message || 'Request could not be cancelled.');
     }
   };
 
@@ -92,12 +157,18 @@ export const VisitorKiosk = () => {
     setTrackedRequest(null);
 
     try {
-      const res = await api.getRequest(searchRequestId.trim());
+      const query = searchRequestId.trim();
+      let res = await api.getRequest(query);
       if (res.success && res.request) {
+        const accessToken = query.startsWith('PASSKEY-')
+          ? query
+          : sessionStorage.getItem(`hg_access_${res.request.requestId}`) || '';
+        if (accessToken && !query.startsWith('PASSKEY-')) res = await api.getRequest(accessToken);
         setTrackedRequest({
           request: res.request,
           qrPass: res.qrPass,
         });
+        setTrackedAccessToken(accessToken);
       }
     } catch (err) {
       setSearchError(err.message || 'Request not found. Please verify reference ID.');
@@ -158,23 +229,27 @@ export const VisitorKiosk = () => {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <h2 className="text-base font-mono font-bold text-zinc-100 uppercase">
-                CLEARANCE REQUEST SUBMITTED
+                {submittedRequest.requestStatus === 'DRAFT' ? 'DRAFT SAVED' : 'CLEARANCE REQUEST SUBMITTED'}
               </h2>
               <div className="p-3 bg-base border border-white/[0.06] rounded inline-block">
                 <span className="text-2xs font-mono text-zinc-500 block">REFERENCE TRACKING ID</span>
                 <span className="text-base font-mono font-bold text-accent">{submittedRequest.requestId}</span>
+                <span className="text-2xs font-mono text-zinc-500 block mt-2">PRIVATE EDIT / CANCEL KEY · SAVE THIS KEY</span>
+                <span className="text-2xs font-mono font-bold text-zinc-200 break-all">{submittedRequest.accessToken}</span>
               </div>
               <p className="text-2xs font-mono text-zinc-400 max-w-sm mx-auto">
-                Host student ({submittedRequest.hostStudentRollNumber}) has been notified. They have 20 minutes to authorize your clearance before this request expires (BR-006).
+                {submittedRequest.requestStatus === 'DRAFT'
+                  ? 'This draft is saved but has not been sent to the host. Keep the private key to resume it later.'
+                  : `Host student (${submittedRequest.hostStudentRollNumber}) has been notified. They have 20 minutes to authorize your clearance before this request expires (BR-006).`}
               </p>
               <div className="pt-2">
-                <Link
-                  to={`/pass/${submittedRequest.requestId}`}
+                {submittedRequest.requestStatus === 'DRAFT' ? <button onClick={() => startEditingRequest(submittedRequest)} className="px-5 py-2.5 bg-[#252529] hover:bg-[#303036] text-zinc-100 text-xs font-mono font-semibold rounded">CONTINUE EDITING DRAFT</button> : <Link
+                  to={`/pass/${submittedRequest.accessToken}`}
                   className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded inline-flex items-center gap-2 transition-colors"
                 >
                   <span>MONITOR DIGITAL PASS LIVE</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                </Link>}
               </div>
             </div>
           ) : (
@@ -385,11 +460,19 @@ export const VisitorKiosk = () => {
 
               <div className="pt-4 border-t border-white/[0.06]">
                 <button
+                  type="button"
+                  onClick={handleSaveVisitorDraft}
+                  disabled={submitLoading}
+                  className="w-full mb-2 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-200 text-xs font-mono font-semibold rounded transition-colors disabled:opacity-50"
+                >
+                  {editingRequest ? 'SAVE CHANGES' : 'SAVE DRAFT'}
+                </button>
+                <button
                   type="submit"
                   disabled={submitLoading}
                   className="w-full py-3 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded uppercase tracking-wider transition-colors disabled:opacity-50"
                 >
-                  {submitLoading ? 'DISPATCHING TO HOST...' : 'SUBMIT CLEARANCE APPLICATION'}
+                  {submitLoading ? 'SAVING...' : editingRequest?.requestStatus === 'DRAFT' ? 'SUBMIT COMPLETED DRAFT' : editingRequest ? 'SAVE REQUEST CHANGES' : 'SUBMIT CLEARANCE APPLICATION'}
                 </button>
               </div>
             </form>
@@ -402,13 +485,13 @@ export const VisitorKiosk = () => {
         <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-6 space-y-5 animate-fade-in">
           <div>
             <span className="text-2xs font-mono uppercase tracking-wider text-zinc-400 block mb-2">
-              TRACK PASS BY REFERENCE NUMBER
+              TRACK BY REQUEST ID OR PRIVATE KEY
             </span>
             <form onSubmit={handleStatusSearch} className="flex gap-2">
               <input
                 type="text"
                 required
-                placeholder="e.g. VR2001 or VR2045"
+                placeholder="Request ID or PASSKEY edit key"
                 value={searchRequestId}
                 onChange={(e) => setSearchRequestId(e.target.value)}
                 className="form-input text-xs font-mono flex-1"
@@ -453,12 +536,19 @@ export const VisitorKiosk = () => {
               {trackedRequest.request.requestStatus === 'APPROVED' && (
                 <div className="pt-2">
                   <Link
-                    to={`/pass/${trackedRequest.request.requestId}`}
+                    to={`/pass/${trackedAccessToken || trackedRequest.request.requestId}`}
                     className="w-full py-2 bg-status-green hover:bg-green-600 text-black text-xs font-mono font-bold rounded flex items-center justify-center gap-2 transition-colors"
                   >
                     <QrCode className="w-4 h-4" />
                     <span>OPEN DIGITAL PASS NOW</span>
                   </Link>
+                </div>
+              )}
+              {!trackedAccessToken && ['PENDING', 'APPROVED'].includes(trackedRequest.request.requestStatus) && <p className="text-2xs font-mono text-status-amber">Enter the private PASSKEY edit key to change or cancel this request.</p>}
+              {trackedAccessToken && ['PENDING', 'APPROVED'].includes(trackedRequest.request.requestStatus) && (
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => startEditingRequest(trackedRequest.request)} className="flex-1 py-2 bg-[#252529] hover:bg-[#303036] text-zinc-200 text-xs font-mono rounded">EDIT REQUEST</button>
+                  <button onClick={cancelTrackedRequest} className="flex-1 py-2 bg-status-redBg hover:bg-status-red text-status-red hover:text-white text-xs font-mono rounded">CANCEL REQUEST</button>
                 </div>
               )}
             </div>

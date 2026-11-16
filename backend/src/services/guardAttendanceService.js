@@ -1,5 +1,6 @@
 import { GuardAttendance } from '../models/GuardAttendance.js';
 import { GuardProfile } from '../models/GuardProfile.js';
+import { GuardShift } from '../models/GuardShift.js';
 import { getISTParts, getNow } from '../utils/timeUtils.js';
 import { generateId } from '../utils/tokenUtils.js';
 
@@ -18,6 +19,7 @@ export const checkInGuardShift = async (guardId, hostelId, guardName) => {
   }
 
   const attendanceId = generateId('ATT');
+  const assignedShift = await GuardShift.findOne({ guardId, date: dateStr, hostelId });
   const record = await GuardAttendance.create({
     attendanceId,
     guardId,
@@ -25,7 +27,10 @@ export const checkInGuardShift = async (guardId, hostelId, guardName) => {
     hostelId,
     date: dateStr,
     checkInTime: getNow(),
-    isActive: true
+    isActive: true,
+    shiftHours: assignedShift
+      ? `${assignedShift.label} (${assignedShift.startTime} - ${assignedShift.endTime})`
+      : undefined
   });
 
   await GuardProfile.findOneAndUpdate({ guardId }, { isOnDuty: true });

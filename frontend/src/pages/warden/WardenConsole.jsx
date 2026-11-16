@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   UserX,
   Briefcase,
+  UserCheck,
   RefreshCw,
   X,
   Plus,
@@ -25,6 +26,7 @@ const NAV_TABS = [
   { id: 'HISTORY', label: 'Historical Visits', icon: Clock },
   { id: 'REPORTS', label: 'Daily Analytics', icon: FileSpreadsheet },
   { id: 'STUDENTS', label: 'Discipline & Status', icon: UserX },
+  { id: 'SHIFTS', label: 'Guard Shift Assignments', icon: UserCheck },
   { id: 'WORKERS', label: 'Staff Registry', icon: Briefcase },
 ];
 
@@ -63,6 +65,13 @@ export const WardenConsole = () => {
   const [studentSearchRoll, setStudentSearchRoll] = useState('');
   const [studentActionMsg, setStudentActionMsg] = useState('');
 
+  const todayInIST = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  const [shiftDate, setShiftDate] = useState(todayInIST);
+  const [shiftGuards, setShiftGuards] = useState([]);
+  const [shiftAssignments, setShiftAssignments] = useState([]);
+  const [shiftForm, setShiftForm] = useState({ guardId: '', label: 'Morning', startTime: '06:00', endTime: '14:00' });
+  const [shiftActionMsg, setShiftActionMsg] = useState('');
+
   // Worker registration modal
   const [isWorkerModalOpen, setIsWorkerModalOpen] = useState(false);
   const [workerForm, setWorkerForm] = useState({
@@ -77,6 +86,47 @@ export const WardenConsole = () => {
     const interval = setInterval(loadWardenDashboard, 20000);
     return () => clearInterval(interval);
   }, [selectedHostel]);
+
+  useEffect(() => {
+    if (activeTab === 'SHIFTS') loadShiftAssignments();
+  }, [activeTab, selectedHostel, shiftDate]);
+
+  const loadShiftAssignments = async () => {
+    try {
+      const [guardRes, shiftRes] = await Promise.all([
+        api.getAssignableGuards(selectedHostel),
+        api.getShiftAssignments({ hostelId: selectedHostel, date: shiftDate })
+      ]);
+      setShiftGuards(guardRes.guards || []);
+      setShiftAssignments(shiftRes.shifts || []);
+      setShiftForm((current) => ({ ...current, guardId: current.guardId || guardRes.guards?.[0]?.guardId || '' }));
+    } catch (err) {
+      setShiftActionMsg(`Error: ${err.message}`);
+    }
+  };
+
+  const handleAssignShift = async (event) => {
+    event.preventDefault();
+    setShiftActionMsg('');
+    try {
+      const result = await api.assignGuardShift({ ...shiftForm, date: shiftDate, hostelId: selectedHostel });
+      setShiftActionMsg(result.message);
+      await loadShiftAssignments();
+    } catch (err) {
+      setShiftActionMsg(`Error: ${err.message}`);
+    }
+  };
+
+  const handleRemoveShift = async (shiftId) => {
+    setShiftActionMsg('');
+    try {
+      const result = await api.removeGuardShiftAssignment(shiftId);
+      setShiftActionMsg(result.message);
+      await loadShiftAssignments();
+    } catch (err) {
+      setShiftActionMsg(`Error: ${err.message}`);
+    }
+  };
 
   const loadWardenDashboard = async () => {
     try {
@@ -581,7 +631,7 @@ export const WardenConsole = () => {
                   STUDENT DISCIPLINARY STATUS MANAGEMENT (BR-002)
                 </span>
                 <p className="text-2xs font-mono text-zinc-500 mt-0.5">
-                  Blocked or suspended students cannot approve visitor requests or host campus guests.
+                  Inactive or blocked students cannot approve visitor requests or host campus guests.
                 </p>
               </div>
 
@@ -605,10 +655,10 @@ export const WardenConsole = () => {
                     SET ACTIVE
                   </button>
                   <button
-                    onClick={() => handleStudentStatusChange('SUSPENDED')}
+                    onClick={() => handleStudentStatusChange('INACTIVE')}
                     className="flex-1 py-2 bg-status-amberBg hover:bg-status-amber text-status-amber hover:text-black border border-status-amberBorder text-2xs font-mono font-bold rounded transition-colors"
                   >
-                    SET SUSPENDED
+                    SET INACTIVE
                   </button>
                   <button
                     onClick={() => handleStudentStatusChange('BLOCKED')}
@@ -621,6 +671,58 @@ export const WardenConsole = () => {
                 {studentActionMsg && (
                   <div className="p-2.5 rounded bg-base border border-white/[0.08] text-2xs font-mono text-zinc-300">
                     {studentActionMsg}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'SHIFTS' && (
+            <div className="space-y-4">
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg p-5 space-y-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <span className="text-2xs font-mono uppercase tracking-wider text-zinc-300 block">GUARD SHIFT ASSIGNMENTS</span>
+                    <span className="text-2xs font-mono text-zinc-500">Assign daily duty windows for {selectedHostel}.</span>
+                  </div>
+                  <div>
+                    <label className="form-label">SHIFT DATE</label>
+                    <input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)} className="form-input text-xs font-mono" />
+                  </div>
+                </div>
+                <form onSubmit={handleAssignShift} className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                  <div>
+                    <label className="form-label">GUARD</label>
+                    <select value={shiftForm.guardId} onChange={(e) => setShiftForm({ ...shiftForm, guardId: e.target.value })} className="form-input text-xs font-mono" required>
+                      {shiftGuards.map((guard) => <option key={guard.guardId} value={guard.guardId}>{guard.name} ({guard.guardId})</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label">SHIFT NAME</label>
+                    <input value={shiftForm.label} onChange={(e) => setShiftForm({ ...shiftForm, label: e.target.value })} className="form-input text-xs font-mono" required />
+                  </div>
+                  <div>
+                    <label className="form-label">START</label>
+                    <input type="time" value={shiftForm.startTime} onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })} className="form-input text-xs font-mono" required />
+                  </div>
+                  <div>
+                    <label className="form-label">END</label>
+                    <input type="time" value={shiftForm.endTime} onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })} className="form-input text-xs font-mono" required />
+                  </div>
+                  <button disabled={shiftGuards.length === 0} className="py-2 px-3 bg-accent hover:bg-accent-hover text-white rounded text-xs font-mono font-semibold disabled:opacity-50">ASSIGN / UPDATE</button>
+                </form>
+                {shiftActionMsg && <div className="text-2xs font-mono text-zinc-300">{shiftActionMsg}</div>}
+              </div>
+              <div className="bg-[#111115] border border-white/[0.08] rounded-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/[0.06] text-2xs font-mono uppercase tracking-wider text-zinc-400">ASSIGNED SHIFTS · {shiftDate}</div>
+                {shiftAssignments.length === 0 ? <div className="p-8 text-center text-2xs font-mono text-zinc-600">NO SHIFTS ASSIGNED FOR THIS DATE</div> : (
+                  <div className="divide-y divide-white/[0.05]">
+                    {shiftAssignments.map((shift) => (
+                      <div key={shift.shiftId} className="p-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                        <div><strong className="text-zinc-100">{shift.guardName}</strong><span className="text-zinc-500"> · {shift.guardId} · {shift.label} · {shift.startTime}–{shift.endTime}</span></div>
+                        <button onClick={() => handleRemoveShift(shift.shiftId)} className="text-status-red hover:text-red-300">REMOVE</button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

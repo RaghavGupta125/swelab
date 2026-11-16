@@ -42,7 +42,9 @@ export const api = {
   getStudentDashboard: () => apiFetch('/requests/student/feed'),
   approveRequest: (requestId) => apiFetch(`/requests/${requestId}/approve`, { method: 'POST' }),
   rejectRequest: (requestId, reason) => apiFetch(`/requests/${requestId}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
-  cancelRequest: (requestId) => apiFetch(`/requests/${requestId}/cancel`, { method: 'POST' }),
+  cancelRequest: (requestId, accessToken) => apiFetch(`/requests/${requestId}/cancel`, { method: 'POST', body: JSON.stringify(accessToken ? { accessToken } : {}) }),
+  updateRequest: (requestId, payload) => apiFetch(`/requests/${requestId}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  submitDraft: (requestId, accessToken) => apiFetch(`/requests/${requestId}/submit`, { method: 'POST', body: JSON.stringify(accessToken ? { accessToken } : {}) }),
 
   // Gate Security
   verifyGatePass: (params) => {
@@ -61,6 +63,10 @@ export const api = {
     const query = new URLSearchParams(params).toString();
     return apiFetch(`/attendance/all?${query}`);
   },
+  getAssignableGuards: (hostelId) => apiFetch(`/attendance/guards${hostelId ? `?hostelId=${hostelId}` : ''}`),
+  getShiftAssignments: (params) => apiFetch(`/attendance/assignments?${new URLSearchParams(params).toString()}`),
+  assignGuardShift: (payload) => apiFetch('/attendance/assignments', { method: 'POST', body: JSON.stringify(payload) }),
+  removeGuardShiftAssignment: (shiftId) => apiFetch(`/attendance/assignments/${shiftId}`, { method: 'DELETE' }),
 
   // Warden
   getWardenDashboard: (hostelId) => apiFetch(`/warden/dashboard${hostelId ? `?hostelId=${hostelId}` : ''}`),
@@ -83,11 +89,13 @@ export const api = {
     return apiFetch(`/admin/users?${query}`);
   },
   updateUserStatus: (userId, status) => apiFetch(`/admin/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  assignUserRole: (userId, role) => apiFetch(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+  assignUserRole: (userId, role, profile) => apiFetch(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role, profile }) }),
   getAuditLogs: (params) => {
     const query = new URLSearchParams(params).toString();
     return apiFetch(`/admin/audit-logs?${query}`);
   },
+  getDirectorySyncStatus: () => apiFetch('/admin/directory/status'),
+  syncStudentDirectory: () => apiFetch('/admin/directory/sync', { method: 'POST' }),
 
   // Reports
   getHistoricalVisits: (params) => {
