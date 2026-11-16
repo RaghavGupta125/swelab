@@ -1,37 +1,48 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Bell, LogOut, ChevronDown, X, Check } from 'lucide-react';
+import { Bell, LogOut, X, ExternalLink } from 'lucide-react';
 
-const ShieldMark = () => (
-  <svg width="20" height="22" viewBox="0 0 20 22" fill="none" className="shrink-0">
-    <path
-      d="M10 1L2 4.5V10C2 14.4 5.4 18.5 10 20C14.6 18.5 18 14.4 18 10V4.5L10 1Z"
-      fill="#E8531D"
-      fillOpacity="0.15"
-      stroke="#E8531D"
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-    <path d="M7 11L9 13L13 9" stroke="#E8531D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+const LNMIITLogoMark = () => (
+  <div className="flex items-center gap-2.5">
+    <div className="w-8 h-8 rounded bg-white p-1 flex items-center justify-center shadow-sm border border-slate-200">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L3 6V12C3 17.5 6.8 22.5 12 24C17.2 22.5 21 17.5 21 12V6L12 2Z" fill="#0067A5" />
+        <path d="M12 6L6 9V13.5C6 17.5 8.6 21 12 22C15.4 21 18 17.5 18 13.5V9L12 6Z" fill="#E86100" fillOpacity="0.2" stroke="#FFFFFF" strokeWidth="1.2" />
+        <path d="M9 12L11 14L15 10" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+    <div>
+      <div className="flex items-center gap-1.5 leading-none">
+        <span className="font-sans text-sm font-bold text-white tracking-tight">
+          THE LNMIIT
+        </span>
+        <span className="text-[10px] font-sans font-semibold text-lnmiit-orange-light bg-lnmiit-orange px-1.5 py-0.5 rounded">
+          MIS / ERP
+        </span>
+      </div>
+      <div className="text-[10px] text-sky-100 font-sans tracking-wide mt-0.5">
+        HostGuard Visitor Entry Platform
+      </div>
+    </div>
+  </div>
 );
 
 const ROLE_CONFIG = {
-  ADMIN: { label: 'ADMIN', color: 'text-purple-400', bg: 'bg-purple-900/40 border-purple-800/60' },
-  WARDEN: { label: 'WARDEN', color: 'text-blue-400', bg: 'bg-blue-900/40 border-blue-800/60' },
-  GUARD: { label: 'GUARD', color: 'text-status-green', bg: 'bg-status-greenBg border-status-greenBorder' },
-  STUDENT: { label: 'STUDENT', color: 'text-zinc-300', bg: 'bg-zinc-800/60 border-zinc-700/60' },
+  ADMIN: { label: 'ADMINISTRATOR', color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200' },
+  WARDEN: { label: 'CHIEF WARDEN', color: 'text-lnmiit-blue', bg: 'bg-sky-50 border-sky-200' },
+  GUARD: { label: 'GATE SECURITY', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
+  STUDENT: { label: 'STUDENT HOST', color: 'text-slate-700', bg: 'bg-slate-100 border-slate-200' },
 };
 
 const NAV_LINKS = {
-  GUARD: [{ to: '/guard', label: 'Gate Console' }],
-  STUDENT: [{ to: '/student', label: 'My Portal' }],
-  WARDEN: [{ to: '/warden', label: 'Operations' }],
+  GUARD: [{ to: '/guard', label: 'Gate Security Console' }],
+  STUDENT: [{ to: '/student', label: 'My Host Portal' }],
+  WARDEN: [{ to: '/warden', label: 'Hostel Operations' }],
   ADMIN: [
-    { to: '/admin', label: 'Admin' },
-    { to: '/warden', label: 'Operations' },
-    { to: '/guard', label: 'Gate' },
+    { to: '/admin', label: 'System Admin' },
+    { to: '/warden', label: 'Warden Console' },
+    { to: '/guard', label: 'Gate Scanner' },
   ],
 };
 
@@ -73,176 +84,128 @@ export const Navbar = () => {
   const navLinks = user ? (NAV_LINKS[user.role] || []) : [];
 
   return (
-    <header className="sticky top-0 z-50 bg-base border-b border-white/[0.06]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-14">
+    <header className="sticky top-0 z-50 shadow-md">
+      {/* Top Institutional Header Bar (Official LNMIIT Medium Persian Blue: #0067A5) */}
+      <div className="bg-[#0067A5] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-14">
 
-          {/* Brand */}
-          <Link to="/" className="flex items-center gap-2.5 select-none group">
-            <ShieldMark />
-            <div>
-              <span className="font-mono text-sm font-bold text-zinc-100 tracking-tight group-hover:text-accent transition-colors">
-                HOSTGUARD
-              </span>
-              <div className="text-[9px] font-mono text-zinc-600 tracking-widest leading-none -mt-0.5">
-                CS314 · LNMIIT
-              </div>
+            {/* Brand Logo & Institute Name */}
+            <Link to="/" className="flex items-center gap-3 select-none group">
+              <LNMIITLogoMark />
+            </Link>
+
+            {/* Right Controls: Notifications & User Profile */}
+            <div className="flex items-center gap-3">
+              {user ? (
+                <>
+                  {/* Notifications Icon */}
+                  <div className="relative" ref={notifsRef}>
+                    <button
+                      onClick={() => {
+                        setShowNotifs(!showNotifs);
+                        if (!showNotifs && unreadCount > 0) markAllRead();
+                      }}
+                      className="relative p-2 rounded text-sky-100 hover:text-white hover:bg-white/10 transition-colors"
+                      aria-label="Notifications"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-lnmiit-orange animate-pulse-subtle" />
+                      )}
+                    </button>
+
+                    {showNotifs && (
+                      <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-200 rounded shadow-erp-dropdown text-slate-800 overflow-hidden animate-fade-in z-50">
+                        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                          <span className="text-xs font-bold text-slate-700">MIS Notifications</span>
+                          <button onClick={() => setShowNotifs(false)} className="text-slate-400 hover:text-slate-600">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="max-h-72 overflow-y-auto">
+                          {notifications.length === 0 ? (
+                            <div className="px-4 py-6 text-center text-xs text-slate-400">No new notices</div>
+                          ) : (
+                            notifications.slice(0, 15).map((n) => (
+                              <div
+                                key={n._id}
+                                className={`px-4 py-2.5 border-b border-slate-100 text-xs ${!n.isRead ? 'bg-sky-50/60' : ''}`}
+                              >
+                                <p className="text-slate-800 font-medium leading-snug">{n.message}</p>
+                                <span className="text-[10px] text-slate-400 font-mono mt-1 block">{timeAgo(n.createdAt)}</span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* User Badge Info */}
+                  <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-white/20 text-right">
+                    <div>
+                      <div className="text-xs font-semibold text-white leading-tight">{user.name}</div>
+                      <div className="flex items-center justify-end gap-1.5 mt-0.5 text-[10px]">
+                        <span className="text-sky-200 font-mono font-medium">
+                          {user.profile?.rollNumber || user.profile?.guardId || user.email}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sign Out Button */}
+                  <button
+                    onClick={handleLogout}
+                    className="p-1.5 rounded text-sky-100 hover:text-white hover:bg-red-600/80 transition-colors"
+                    title="Sign Out from MIS"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-3.5 py-1.5 bg-white text-lnmiit-blue hover:bg-slate-100 text-xs font-bold rounded shadow-sm transition-colors"
+                >
+                  ERP Login
+                </Link>
+              )}
             </div>
-          </Link>
+          </div>
+        </div>
+      </div>
 
-          {/* Desktop Nav */}
-          {user && navLinks.length > 0 && (
-            <nav className="hidden md:flex items-center gap-1">
+      {/* Sub-Navbar (White/Slate Bar with ERP Tabs) */}
+      {user && navLinks.length > 0 && (
+        <div className="bg-white border-b border-slate-200 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto flex items-center justify-between h-10">
+            <nav className="flex items-center gap-1">
               {navLinks.map((link) => {
                 const active = location.pathname === link.to;
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors relative ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded transition-colors ${
                       active
-                        ? 'text-zinc-100 bg-white/[0.07]'
-                        : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]'
+                        ? 'text-lnmiit-blue bg-lnmiit-blue-light border-b-2 border-lnmiit-blue'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     {link.label}
-                    {active && (
-                      <span className="absolute bottom-0 left-3 right-3 h-px bg-accent rounded-full" />
-                    )}
                   </Link>
                 );
               })}
             </nav>
-          )}
 
-          {/* Right controls */}
-          <div className="flex items-center gap-2">
-            {user ? (
-              <>
-                {/* Notification Bell */}
-                <div className="relative" ref={notifsRef}>
-                  <button
-                    onClick={() => { setShowNotifs(!showNotifs); if (!showNotifs && unreadCount > 0) markAllRead(); }}
-                    className="relative p-2 rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05] transition-colors"
-                    aria-label="Notifications"
-                  >
-                    <Bell className="w-4 h-4" />
-                    {unreadCount > 0 && (
-                      <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent animate-led-blink" />
-                    )}
-                  </button>
-
-                  {showNotifs && (
-                    <div className="absolute right-0 top-full mt-2 w-80 bg-[#111115] border border-white/[0.1] rounded-md shadow-2xl shadow-black/60 overflow-hidden animate-fade-in">
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-                        <span className="text-xs font-semibold text-zinc-200">Notifications</span>
-                        <button onClick={() => setShowNotifs(false)} className="text-zinc-500 hover:text-zinc-200">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <div className="max-h-80 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="px-4 py-6 text-center text-xs text-zinc-600">No notifications</div>
-                        ) : (
-                          notifications.slice(0, 20).map((n) => (
-                            <div
-                              key={n._id}
-                              className={`px-4 py-3 border-b border-white/[0.04] ${!n.isRead ? 'bg-white/[0.03]' : ''}`}
-                            >
-                              <div className="flex items-start gap-2">
-                                {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 mt-1.5" />}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs text-zinc-200 leading-snug">{n.message}</p>
-                                  <p className="text-[10px] font-mono text-zinc-600 mt-1">{timeAgo(n.createdAt)}</p>
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* User chip */}
-                <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-white/[0.06]">
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-zinc-200 leading-tight">{user.name}</div>
-                    <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                      <span className={`text-[9px] font-mono font-bold tracking-widest px-1.5 py-px rounded border ${roleConfig.color} ${roleConfig.bg}`}>
-                        {roleConfig.label}
-                      </span>
-                      {user.profile?.rollNumber && (
-                        <span className="text-[10px] font-mono text-zinc-500">{user.profile.rollNumber}</span>
-                      )}
-                      {user.profile?.guardId && (
-                        <span className="text-[10px] font-mono text-status-green">{user.profile.guardId}</span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="p-1.5 rounded-md text-zinc-600 hover:text-status-red hover:bg-status-redBg transition-colors"
-                    title="Sign Out"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Mobile menu toggle */}
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05] transition-colors"
-                >
-                  {mobileMenuOpen ? <X className="w-4 h-4" /> : (
-                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-                      <rect y="2" width="16" height="1.5" rx="1" />
-                      <rect y="7" width="16" height="1.5" rx="1" />
-                      <rect y="12" width="16" height="1.5" rx="1" />
-                    </svg>
-                  )}
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/login"
-                className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-md transition-colors"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && user && (
-        <div className="md:hidden border-t border-white/[0.06] bg-[#111115] animate-fade-in">
-          <div className="px-4 py-3 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  location.pathname === link.to
-                    ? 'bg-accent/10 text-accent'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.05]'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-              <div>
-                <div className="text-xs font-medium text-zinc-200">{user.name}</div>
-                <span className={`text-[9px] font-mono font-bold tracking-widest px-1.5 py-px rounded border ${roleConfig.color} ${roleConfig.bg}`}>
-                  {roleConfig.label}
-                </span>
-              </div>
-              <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-status-red transition-colors">
-                <LogOut className="w-3.5 h-3.5" /> Sign Out
-              </button>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-sans font-bold px-2 py-0.5 rounded border ${roleConfig.color} ${roleConfig.bg}`}>
+                {roleConfig.label}
+              </span>
+              <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                SESSION: VERIFIED
+              </span>
             </div>
           </div>
         </div>
