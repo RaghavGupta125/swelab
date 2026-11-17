@@ -1,3 +1,61 @@
+/**
+ * ============================================================================
+ *                    HOSTGUARD BACKEND - VIVA CHEAT SHEET & INDEX
+ * ============================================================================
+ * Use "Ctrl + F" in this file to jump directly to any topic your examiner asks:
+ *
+ *  EXAMINER QUESTION / TOPIC            | EXACT SEARCH KEYWORD (Ctrl + F)
+ * --------------------------------------+-------------------------------------
+ *  1. "Show me your database schemas"   | SECTION 2: SCHEMAS
+ *     - User Schema (roles, status)     | UserSchema
+ *     - Visit Request Schema            | VisitRequestSchema
+ *     - QR Code Pass Schema             | QRPassSchema
+ *     - Gate Visit Record (Entry/Exit)  | VisitRecordSchema
+ *     - Sample Schema (New Template)    | SAMPLE SCHEMA
+ *
+ *  2. "How does Authentication work?"   | SECTION 4: AUTH
+ *     - Verify JWT Token Middleware     | const auth =
+ *     - Login Route                     | app.post('/api/auth/login'
+ *     - Password Hash Check             | bcrypt.compare
+ *
+ *  3. "Where is visitor request logic?" | SECTION 5: REQUESTS
+ *     - Create Visit Request            | app.post('/api/requests'
+ *     - 5-Visitor Quota Check (BR-001)  | currentActiveCount >= 5
+ *     - Approve Request & Generate QR   | app.post('/api/requests/:id/approve'
+ *     - QR Code DataURL Generation      | QRCode.toDataURL
+ *     - Reject Request with Reason      | app.post('/api/requests/:id/reject'
+ *     - Student Dashboard Feed          | app.get('/api/requests/student/feed'
+ *
+ *  4. "How does gate security work?"    | SECTION 6: GATE
+ *     - Scan & Verify QR Code / Token   | app.get('/api/gate/verify'
+ *     - Guard Check-In (Entry)          | app.post('/api/gate/checkin'
+ *     - Guard Check-Out (Exit)          | app.post('/api/gate/checkout'
+ *     - Active Visitors Inside Gate     | app.get('/api/gate/active-visitors'
+ *
+ *  5. "Where is Guard Attendance?"      | SECTION 7: ATTENDANCE
+ *     - Shift Check-In / Check-Out      | app.post('/api/attendance/checkin'
+ *
+ *  6. "How does Warden Console work?"   | SECTION 8: WARDEN
+ *     - Hostel Occupancy & Stats        | app.get('/api/warden/dashboard'
+ *     - Overstay Disciplinary Alerts    | app.get('/api/warden/alerts'
+ *     - Block / Unblock Student         | app.patch('/api/warden/students'
+ *
+ *  7. "Where is Worker Management?"     | SECTION 9: WORKERS
+ *     - Staff In/Out Toggle             | app.post('/api/workers/gate-activity'
+ *
+ *  8. "Where is Admin Management?"      | SECTION 10: ADMIN
+ *     - System Overview & Stats         | app.get('/api/admin/overview'
+ *     - Change User Role / Status       | app.patch('/api/admin/users'
+ *
+ *  9. "Add a new schema/feature live"   | SECTION 12: SAMPLE CRUD
+ *     - Create Document (POST)          | app.post('/api/feedback'
+ *     - Read Documents (GET)            | app.get('/api/feedback'
+ *
+ * 10. "How does server connect & run?"  | SECTION 14: LAUNCH
+ *     - MongoDB URI & Port 5000         | mongoose.connect
+ * ============================================================================
+ */
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -16,13 +74,13 @@ const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hostguar
 const JWT_SECRET = process.env.JWT_SECRET || 'hostguard_secret_key_12345';
 
 // -------------------------------------------------------------
-// 1. MIDDLEWARE
+// SECTION 1: MIDDLEWARE
 // -------------------------------------------------------------
 app.use(cors());
 app.use(express.json());
 
 // -------------------------------------------------------------
-// 2. MONGOOSE DATABASE SCHEMAS & MODELS
+// SECTION 2: SCHEMAS
 // -------------------------------------------------------------
 const UserSchema = new mongoose.Schema({
   userId: { type: String, default: '' },
@@ -209,7 +267,7 @@ async function getProfile(user) {
 }
 
 // -------------------------------------------------------------
-// 3. AUTHENTICATION HELPER & MIDDLEWARE
+// SECTION 3: AUTH MIDDLEWARE
 // -------------------------------------------------------------
 const auth = async (req, res, next) => {
   try {
@@ -232,7 +290,7 @@ const auth = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------
-// 4. AUTH ROUTES
+// SECTION 4: AUTH
 // -------------------------------------------------------------
 app.post('/api/auth/login', async (req, res) => {
   try {
@@ -304,7 +362,7 @@ app.get('/api/auth/sso/config', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 5. VISITOR REQUEST ROUTES
+// SECTION 5: REQUESTS
 // -------------------------------------------------------------
 app.post('/api/requests', async (req, res) => {
   try {
@@ -520,7 +578,7 @@ app.post('/api/requests/:id/submit', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 6. GATE SECURITY (GUARD) ROUTES
+// SECTION 6: GATE
 // -------------------------------------------------------------
 app.get('/api/gate/verify', async (req, res) => {
   try {
@@ -647,7 +705,7 @@ app.get('/api/gate/active-visitors', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 7. GUARD ATTENDANCE ROUTES
+// SECTION 7: ATTENDANCE
 // -------------------------------------------------------------
 app.post('/api/attendance/checkin', auth, async (req, res) => {
   try {
@@ -720,7 +778,7 @@ app.post('/api/attendance/assignments', (req, res) => res.json({ success: true }
 app.delete('/api/attendance/assignments/:id', (req, res) => res.json({ success: true }));
 
 // -------------------------------------------------------------
-// 8. WARDEN ROUTES
+// SECTION 8: WARDEN
 // -------------------------------------------------------------
 app.get('/api/warden/dashboard', async (req, res) => {
   try {
@@ -804,7 +862,7 @@ app.patch('/api/warden/students/:roll/status', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 9. WORKER ROUTES
+// SECTION 9: WORKERS
 // -------------------------------------------------------------
 app.get('/api/workers', async (req, res) => {
   try {
@@ -849,7 +907,7 @@ app.post('/api/workers/gate-activity', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 10. ADMIN & AUDIT ROUTES
+// SECTION 10: ADMIN
 // -------------------------------------------------------------
 app.get('/api/admin/overview', async (req, res) => {
   try {
@@ -909,7 +967,7 @@ app.get('/api/admin/directory/status', (req, res) => res.json({ success: true, s
 app.post('/api/admin/directory/sync', (req, res) => res.json({ success: true, message: 'Sync complete' }));
 
 // -------------------------------------------------------------
-// 11. NOTIFICATIONS & REPORTS ROUTES
+// SECTION 11: NOTIFICATIONS & REPORTS
 // -------------------------------------------------------------
 app.get('/api/notifications', async (req, res) => {
   try {
@@ -934,9 +992,9 @@ app.get('/api/reports/visits', async (req, res) => {
   }
 });
 
-// =============================================================
-// ⭐ SAMPLE CRUD ENDPOINTS (For viva live demonstration)
-// =============================================================
+// -------------------------------------------------------------
+// SECTION 12: SAMPLE CRUD
+// -------------------------------------------------------------
 // 1. Create a document (POST)
 app.post('/api/feedback', async (req, res) => {
   try {
@@ -958,7 +1016,7 @@ app.get('/api/feedback', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 12. STATIC FRONTEND SERVING
+// SECTION 13: STATIC FRONTEND
 // -------------------------------------------------------------
 const distPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(distPath));
@@ -970,7 +1028,7 @@ app.get('*', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 13. SERVER LAUNCH
+// SECTION 14: LAUNCH
 // -------------------------------------------------------------
 mongoose.connect(MONGO_URI)
   .then(() => {
