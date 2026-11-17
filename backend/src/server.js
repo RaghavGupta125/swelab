@@ -1030,15 +1030,17 @@ app.get('*', (req, res) => {
 // -------------------------------------------------------------
 // SECTION 14: LAUNCH
 // -------------------------------------------------------------
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log(`[HostGuard DB] Connected to MongoDB: ${MONGO_URI}`);
-    app.listen(PORT, () => {
-      console.log(`[HostGuard Server] Running on http://localhost:${PORT}`);
+if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+  mongoose.connect(MONGO_URI)
+    .then(() => {
+      console.log(`[HostGuard DB] Connected to MongoDB: ${MONGO_URI}`);
+      app.listen(PORT, () => {
+        console.log(`[HostGuard Server] Running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('[HostGuard DB Error]:', err.message);
     });
-  })
-  .catch((err) => {
-    console.error('[HostGuard DB Error]:', err.message);
-  });
+}
 
 export default app;

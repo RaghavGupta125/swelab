@@ -6,6 +6,7 @@
   "scripts": {
     "start": "cd backend && npm start",
     "seed": "cd backend && npm run seed",
+    "create": "cd backend && npm run create",
     "dev": "nodemon --watch backend --exec \"npm run dev:backend\" & nodemon --watch frontend --exec \"npm run dev:frontend\"",
     "test": "cd backend && npm test",
     "build": "cd frontend && npm run build",
