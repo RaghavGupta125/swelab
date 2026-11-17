@@ -150,6 +150,18 @@ const NotificationSchema = new mongoose.Schema({
   isRead: { type: Boolean, default: false }
 }, { timestamps: true });
 
+// =============================================================
+// ⭐ SAMPLE SCHEMA (Viva Template for Adding New Models)
+// Use this if the examiner asks: "Add a new schema/model to MongoDB"
+// =============================================================
+const SampleFeedbackSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  message: { type: String, required: true },
+  submittedBy: { type: String, default: 'Student / Visitor' },
+  rating: { type: Number, min: 1, max: 5, default: 5 },
+  status: { type: String, enum: ['OPEN', 'RESOLVED'], default: 'OPEN' }
+}, { timestamps: true });
+
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export const StudentProfile = mongoose.models.StudentProfile || mongoose.model('StudentProfile', StudentProfileSchema);
 export const GuardProfile = mongoose.models.GuardProfile || mongoose.model('GuardProfile', GuardProfileSchema);
@@ -161,6 +173,7 @@ export const Hostel = mongoose.models.Hostel || mongoose.model('Hostel', HostelS
 export const Worker = mongoose.models.Worker || mongoose.model('Worker', WorkerSchema);
 export const GuardAttendance = mongoose.models.GuardAttendance || mongoose.model('GuardAttendance', GuardAttendanceSchema);
 export const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+export const SampleFeedback = mongoose.models.SampleFeedback || mongoose.model('SampleFeedback', SampleFeedbackSchema);
 
 // Helper to attach unified profile object
 async function getProfile(user) {
@@ -916,6 +929,29 @@ app.get('/api/reports/visits', async (req, res) => {
   try {
     const records = await VisitRecord.find().sort({ actualEntryTime: -1 }).limit(100);
     res.json({ success: true, reports: records });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// =============================================================
+// ⭐ SAMPLE CRUD ENDPOINTS (For viva live demonstration)
+// =============================================================
+// 1. Create a document (POST)
+app.post('/api/feedback', async (req, res) => {
+  try {
+    const item = await SampleFeedback.create(req.body);
+    res.status(201).json({ success: true, data: item });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// 2. Read documents (GET)
+app.get('/api/feedback', async (req, res) => {
+  try {
+    const items = await SampleFeedback.find().sort({ createdAt: -1 });
+    res.json({ success: true, count: items.length, data: items });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
