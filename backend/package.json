@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "seed": "node src/seeds/seedData.js",
-    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand --detectOpenHandles --forceExit"
+    "seed": "node src/seed.js",
+    "test": "node src/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
